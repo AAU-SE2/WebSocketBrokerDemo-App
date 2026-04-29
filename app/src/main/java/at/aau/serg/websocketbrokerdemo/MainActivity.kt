@@ -5,10 +5,8 @@ import android.os.Bundle
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
-import at.aau.serg.websocketbrokerdemo.network.lobby.LobbyListener
 import com.example.myapplication.R
 import android.widget.Button;
-import android.widget.Toast;
 import android.content.Intent
 import android.util.Log
 import at.aau.serg.websocketbrokerdemo.model.ClientState
