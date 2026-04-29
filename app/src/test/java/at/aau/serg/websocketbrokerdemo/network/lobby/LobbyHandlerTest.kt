@@ -69,9 +69,6 @@ class LobbyHandlerTest {
         }
     """.trimIndent()
 
-    // ---------------------------
-    // NEW_PLAYER_JOINED
-    // ---------------------------
 
     @Test
     fun `NEW_PLAYER_JOINED calls onNewPlayerJoined with correct data`() {
@@ -123,9 +120,6 @@ class LobbyHandlerTest {
         Assertions.assertEquals("A1", result?.existingPlayers?.get(0)?.position)
     }
 
-    // ---------------------------
-    // PLAYER_REJOINED
-    // ---------------------------
 
     @Test
     fun `PLAYER_REJOINED calls onPlayerRejoined with correct data`() {
@@ -162,9 +156,6 @@ class LobbyHandlerTest {
         Assertions.assertTrue(true)
     }
 
-    // ---------------------------
-    // GAME_FULL
-    // ---------------------------
 
     @Test
     fun `GAME_FULL calls onGameFull with correct data`() {
@@ -183,9 +174,6 @@ class LobbyHandlerTest {
         Assertions.assertTrue(true)
     }
 
-    // ---------------------------
-    // PLAYER_REMOVED
-    // ---------------------------
 
     @Test
     fun `PLAYER_REMOVED calls onPlayerRemoved when playerId matches ClientState`() {

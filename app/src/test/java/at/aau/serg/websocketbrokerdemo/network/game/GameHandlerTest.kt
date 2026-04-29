@@ -208,7 +208,7 @@ class GameHandlerTest {
         Assertions.assertTrue(true)
     }
 
-    // catch-Block
+    // catch-Block testen
     @Test
     fun `unknown type goes to catch block`() {
         GameHandler.handle("""{ "type": "UNKNOWN_TYPE" }""")
