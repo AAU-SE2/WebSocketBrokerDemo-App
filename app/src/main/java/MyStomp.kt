@@ -29,7 +29,7 @@ class MyStomp(val callbacks: Callbacks) {
     private var gameCollector: Job? = null
 
     private lateinit var client: StompClient
-    private var session: StompSession? = null
+    //private var session: StompSession? = null
 
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
@@ -44,12 +44,14 @@ class MyStomp(val callbacks: Callbacks) {
     }
 
     fun connect() {
+        Log.d("STOMP", "CONNECT called")
         client = StompClient(OkHttpWebSocketClient()) // other config can be passed in here
         scope.launch {
             try {
                 activeSession = client.connect(WEBSOCKET_URI)
                 session = activeSession
 
+                Log.d("STOMP", "CONNECTED -> session = $activeSession")
                 // connect to topic lobby-response
                 lobbyFlow = activeSession.subscribeText("/topic/lobby-response")
                 lobbyCollector = scope.launch {
@@ -59,6 +61,7 @@ class MyStomp(val callbacks: Callbacks) {
                         LobbyHandler.handle(msg)
                     }
                 }
+                callback("connected")
 
                 // connect to topic game-response
                 gameFlow = activeSession.subscribeText("/topic/game-response")
@@ -77,6 +80,7 @@ class MyStomp(val callbacks: Callbacks) {
                 val json = JSONObject()
                 json.put("type", OutgoingLobbyMessageType.JOIN_LOBBY.toString())
                 json.put("payload", payload)
+                Log.d("STOMP", "AUTO JOIN -> session = $activeSession")
                 activeSession.sendText("/app/lobby", json.toString())
 
             } catch (e: Exception) {
