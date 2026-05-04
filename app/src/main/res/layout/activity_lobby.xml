@@ -23,7 +23,7 @@
         android:id="@+id/btnLeave"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:alpha="0"
+        android:alpha="1"
         android:text="leave"
 
         app:layout_constraintBottom_toBottomOf="parent"
@@ -39,7 +39,7 @@
         android:layout_width="141dp"
         android:layout_height="38dp"
         android:text="Ready"
-        android:alpha="0"
+        android:alpha="1"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -52,7 +52,7 @@
         android:layout_width="141dp"
         android:layout_height="38dp"
         android:text="Start Game"
-        android:alpha="0"
+        android:alpha="1"
 
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
