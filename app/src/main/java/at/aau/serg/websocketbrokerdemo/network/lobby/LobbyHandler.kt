@@ -4,6 +4,7 @@ import at.aau.serg.websocketbrokerdemo.messaging.dtos.ExistingPlayerDTO
 import at.aau.serg.websocketbrokerdemo.messaging.dtos.lobbyDTO.GameFullPayload
 import at.aau.serg.websocketbrokerdemo.messaging.dtos.LobbyMessage
 import at.aau.serg.websocketbrokerdemo.messaging.dtos.LobbyMessageType
+import at.aau.serg.websocketbrokerdemo.messaging.dtos.SetreadyDTO
 import at.aau.serg.websocketbrokerdemo.messaging.dtos.lobbyDTO.NewPlayerJoinedPayload
 import at.aau.serg.websocketbrokerdemo.messaging.dtos.lobbyDTO.PlayerRejoinedPayload
 import at.aau.serg.websocketbrokerdemo.model.ClientState
@@ -11,12 +12,15 @@ import org.json.JSONObject
 
 object LobbyHandler {
 
+    var onOtherPlayerRemoved: ((String) -> Unit)? = null
     var onNewPlayerJoined: ((NewPlayerJoinedPayload) -> Unit)? = null
     var onPlayerRejoined: ((PlayerRejoinedPayload) -> Unit)? = null
     var onGameFull: ((GameFullPayload) -> Unit)? = null
-    var onLobbyJoined: (() -> Unit)? = null  // ← neu
-    var onPlayerRemoved: ((String) -> Unit)? = null  // ← neu
-
+    var onLobbyJoined: (() -> Unit)? = null
+    var onPlayerRemoved: ((String) -> Unit)? = null
+    // setready
+    //var onSetReady: ((NewPlayerJoinedPayload) -> Unit)? = null
+    var onSetReady: ((SetreadyDTO) -> Unit)? = null
     fun handle(msg: String) {
         val json = JSONObject(msg)
         val type = LobbyMessageType.valueOf(json.getString("type"))
@@ -43,8 +47,27 @@ object LobbyHandler {
                 val playerId = payload.getString("playerId")
                 if (playerId == ClientState.playerId) {
                     onPlayerRemoved?.invoke(playerId)
+                } else {
+                    onOtherPlayerRemoved?.invoke(playerId)  //       anderer Spieler
                 }
             }
+            // setready
+            LobbyMessageType.SET_CHARACTER_TYPE_AND_STATUS_READY -> {
+            /*
+                val dto =parseNewPlayerJoined(payload)
+                ClientState.players = dto.existingPlayers
+                ClientState.availableCharacters = dto.availableCharacters
+                onSetReady?.invoke(dto)
+
+            */
+                val dto = parseSetReady(payload)
+
+                ClientState.players = dto.existingPlayers
+                ClientState.availableCharacters = dto.availableCharacters
+
+                onSetReady?.invoke(dto)
+            }
+
         }
     }
 
@@ -79,9 +102,24 @@ object LobbyHandler {
             ExistingPlayerDTO(
                 playerId = p.getString("playerId"),
                 ready = p.getBoolean("ready"),
-                character = p.optString("character").takeIf { it.isNotEmpty() },
+                character = p.optString("characterType").takeIf { it.isNotEmpty() },
                 position = p.optString("position").takeIf { it.isNotEmpty() }
             )
         }
     }
+
+    private fun parseSetReady(payload: JSONObject): SetreadyDTO {
+        val characters = (0 until payload.getJSONArray("availableCharacters").length())
+            .map { payload.getJSONArray("availableCharacters").getString(it) }
+
+        return SetreadyDTO(
+            playerId = payload.getString("playerId"),
+            characterType = payload.getString("characterType"),
+            ready = payload.getBoolean("ready"),
+            availableCharacters = characters,
+            existingPlayers = parsePlayers(payload)
+        )
+    }
+
+
 }
