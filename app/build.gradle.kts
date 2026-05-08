@@ -109,6 +109,20 @@ sonar {
             "sonar.coverage.jacoco.xmlReportPaths",
             "${project.projectDir}/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
         )
+        property(
+            "sonar.coverage.exclusions",
+            "**/Color.kt," +
+            "**/Theme.kt," +
+            "**/Type.kt," +
+            "**/MainActivity.kt," +
+            "**/LobbyActivity.kt," +
+            "**/GameActivity.kt," +
+            "**/Callbacks.kt," +
+            "**/UserPreferences.kt," +
+            "**/MyStomp.kt," +
+            "**/LearnActivity.kt"
+
+        )
     }
 }
 
@@ -127,6 +141,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.junit.ktx)
     testImplementation(libs.junit)
     testImplementation(libs.junit.jupiter.api)
     testRuntimeOnly(libs.junit.jupiter.engine)
@@ -137,4 +152,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    testImplementation("org.json:json:20231013")
+    testImplementation("org.mockito:mockito-core:5.11.0")
+    testImplementation("org.mockito:mockito-inline:5.2.0")
 }

@@ -5,10 +5,8 @@ import android.os.Bundle
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
-import at.aau.serg.websocketbrokerdemo.network.lobby.LobbyListener
 import com.example.myapplication.R
 import android.widget.Button;
-import android.widget.Toast;
 import android.content.Intent
 import android.util.Log
 import at.aau.serg.websocketbrokerdemo.model.ClientState
@@ -20,9 +18,13 @@ class MainActivity : ComponentActivity(), Callbacks {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        myStomp = MyStomp(this)
-
         super.onCreate(savedInstanceState)
+
+        // myStomp = MyStomp(this) // hier wird es bei jedem oncreat neu erstellet so
+        if (!::myStomp.isInitialized) {  //  nur einmal erstellen
+            myStomp = MyStomp(this)
+        }
+       // super.onCreate(savedInstanceState)
         // ID wird hier einmalig erstellt und gespeichert
         val playerId = UserPreferences.getOrCreatePlayerId(this)
         ClientState.playerId = playerId
@@ -47,9 +49,9 @@ class MainActivity : ComponentActivity(), Callbacks {
 
         val btnStart = findViewById<Button>(R.id.btnStart)
         btnStart.setOnClickListener {
-            //myStomp.connect()
+            myStomp.connect()
             //TEST: ACHTUNG NUR ZUM TESTEN!!!!
-            startActivity(Intent(this, LobbyActivity::class.java))
+            //startActivity(Intent(this, LobbyActivity::class.java))
         }
 
         
