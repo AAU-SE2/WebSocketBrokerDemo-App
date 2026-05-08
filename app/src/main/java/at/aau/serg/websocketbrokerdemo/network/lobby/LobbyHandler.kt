@@ -102,7 +102,7 @@ object LobbyHandler {
             ExistingPlayerDTO(
                 playerId = p.getString("playerId"),
                 ready = p.getBoolean("ready"),
-                character = p.optString("characterType").takeIf { it.isNotEmpty() },
+                character = p.optString("character").takeIf { it.isNotEmpty() },
                 position = p.optString("position").takeIf { it.isNotEmpty() }
             )
         }
