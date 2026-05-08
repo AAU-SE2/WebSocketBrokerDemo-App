@@ -29,7 +29,7 @@ class MyStomp(val callbacks: Callbacks) {
     private var gameCollector: Job? = null
 
     private lateinit var client: StompClient
-    private var session: StompSession? = null
+    //private var session: StompSession? = null
 
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
@@ -44,12 +44,14 @@ class MyStomp(val callbacks: Callbacks) {
     }
 
     fun connect() {
+        Log.d("STOMP", "CONNECT called")
         client = StompClient(OkHttpWebSocketClient()) // other config can be passed in here
         scope.launch {
             try {
                 activeSession = client.connect(WEBSOCKET_URI)
-                session = activeSession
+                //session = activeSession
 
+                Log.d("STOMP", "CONNECTED -> session = $activeSession")
                 // connect to topic lobby-response
                 lobbyFlow = activeSession.subscribeText("/topic/lobby-response")
                 lobbyCollector = scope.launch {
@@ -59,6 +61,7 @@ class MyStomp(val callbacks: Callbacks) {
                         LobbyHandler.handle(msg)
                     }
                 }
+                callback("connected")
 
                 // connect to topic game-response
                 gameFlow = activeSession.subscribeText("/topic/game-response")
@@ -77,6 +80,7 @@ class MyStomp(val callbacks: Callbacks) {
                 val json = JSONObject()
                 json.put("type", OutgoingLobbyMessageType.JOIN_LOBBY.toString())
                 json.put("payload", payload)
+                Log.d("STOMP", "AUTO JOIN -> session = $activeSession")
                 activeSession.sendText("/app/lobby", json.toString())
 
             } catch (e: Exception) {
@@ -102,11 +106,26 @@ class MyStomp(val callbacks: Callbacks) {
         val json = JSONObject()
         json.put("type", OutgoingLobbyMessageType.LEAVE_LOBBY.toString())
         json.put("payload", payload)
+        Log.d("STOMP", "LEAVE -> session = $activeSession")
 
+        /*
         scope.launch {
             try {
-                session?.sendText("/app/lobby", json.toString())
+                activeSession?.sendText("/app/lobby", json.toString())
                     ?: callback("Error: Not connected")
+            } catch (e: Exception) {
+                Log.e("MyStomp", "Leaving lobby failed", e)
+            }
+        }
+
+         */
+        scope.launch {
+            try {
+                if (::activeSession.isInitialized) {
+                    activeSession.sendText("/app/lobby", json.toString())
+                } else {
+                    callback("Error: Not connected")
+                }
             } catch (e: Exception) {
                 Log.e("MyStomp", "Leaving lobby failed", e)
             }
@@ -120,15 +139,30 @@ class MyStomp(val callbacks: Callbacks) {
         json.put("type", OutgoingLobbyMessageType.JOIN_LOBBY.toString())
         json.put("payload", payload)
 
+        Log.d("STOMP", "JOIN -> session = $activeSession")
+
         Log.d("MyStomp", "JOIN_LOBBY payload: $payload")
         Log.d("MyStomp", "JOIN_LOBBY full message: $json")
+        /*
         scope.launch {
             try{
-            session?.sendText("/app/lobby", json.toString())
-                ?: callback("Error: Not connected")
-        } catch (e: Exception) {
-            Log.e("MyStomp", "Join lobby failed", e)
+                activeSession?.sendText("/app/lobby", json.toString())
+                    ?: callback("Error: Not connected")
+            } catch (e: Exception) {
+                Log.e("MyStomp", "Join lobby failed", e)
+            }
         }
+        */
+        scope.launch {
+            try {
+                if (::activeSession.isInitialized) {
+                    activeSession.sendText("/app/lobby", json.toString())
+                } else {
+                    callback("Error: Not connected")
+                }
+            } catch (e: Exception) {
+                Log.e("MyStomp", "Join lobby failed", e)
+            }
         }
     }
     fun startGame() {
@@ -138,7 +172,7 @@ class MyStomp(val callbacks: Callbacks) {
 
         scope.launch {
             try {
-                session?.sendText("/app/game", json.toString())
+                activeSession.sendText("/app/game", json.toString())
                     ?: callback("Error: Not connected")
             } catch (e: Exception) {
                 Log.e("MyStomp", "START_GAME failed", e)
@@ -155,11 +189,24 @@ class MyStomp(val callbacks: Callbacks) {
         payload.put("ready", isReady)
 
         json.put("payload", payload)
-
+        Log.d("STOMP", "SET_READY -> session = $activeSession")
+/*
         scope.launch {
             try {
-                session?.sendText("/app/lobby", json.toString())
+                activeSession?.sendText("/app/lobby", json.toString())
                     ?: callback("Error: Not connected")
+            } catch (e: Exception) {
+                Log.e("MyStomp", "SET_READY failed", e)
+            }
+        }
+        */
+        scope.launch {
+            try {
+                if (::activeSession.isInitialized) {
+                    activeSession.sendText("/app/lobby", json.toString())
+                } else {
+                    callback("Error: Not connected")
+                }
             } catch (e: Exception) {
                 Log.e("MyStomp", "SET_READY failed", e)
             }
