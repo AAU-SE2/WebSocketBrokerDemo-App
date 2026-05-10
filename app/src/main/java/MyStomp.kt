@@ -133,7 +133,7 @@ class MyStomp(val callbacks: Callbacks) {
     }
     fun joinLobby() {
         val payload = JSONObject()
-        payload.put("playerId", ClientState.playerId)
+        payload.put("playerKey", ClientState.playerId)
 
         val json = JSONObject()
         json.put("type", OutgoingLobbyMessageType.JOIN_LOBBY.toString())
