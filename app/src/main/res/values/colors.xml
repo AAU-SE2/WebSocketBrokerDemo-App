@@ -13,4 +13,5 @@
     <color name="light_blue_A400">#FF00B0FF</color>
     <color name="black_overlay">#66000000</color>
     <color name="cluedo_pink">#D12E7D</color>
+    <color name="my_card_color">#D12E7D</color>
 </resources>
