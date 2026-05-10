@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.*
+import android.view.View
 import androidx.activity.ComponentActivity
 import at.aau.serg.websocketbrokerdemo.messaging.dtos.ExistingPlayerDTO
 import at.aau.serg.websocketbrokerdemo.model.CardRepository
@@ -22,9 +23,9 @@ class LobbyActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lobby)
-       // ClientState.playerId = UUID.randomUUID().toString()
+        ClientState.playerId = UUID.randomUUID().toString()
        // Log.d("DEBUG", "PLAYER_ID = ${ClientState.playerId}")
-       // MyStomp.instance.connect()
+        MyStomp.instance.connect()
         val imgMyCharacter = findViewById<ImageView>(R.id.imgMyCharacter)
 
         val btnPrev = findViewById<ImageButton>(R.id.btnPrev)
@@ -157,9 +158,10 @@ class LobbyActivity : ComponentActivity() {
         }
     }
     private fun lockCharacterSelection() {
-        findViewById<ImageButton>(R.id.btnPrev).isEnabled = false
-        findViewById<ImageButton>(R.id.btnNext).isEnabled = false
+        findViewById<ImageButton>(R.id.btnPrev).visibility = View.GONE
+        findViewById<ImageButton>(R.id.btnNext).visibility = View.GONE
         findViewById<Button>(R.id.btnReady).isEnabled = false
+        findViewById<ImageView>(R.id.imgReadyCheck).visibility = View.VISIBLE
     }
     private fun updateMyCharacterImage(imgView: ImageView) {
 
