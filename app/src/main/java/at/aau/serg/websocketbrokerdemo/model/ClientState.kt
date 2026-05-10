@@ -17,5 +17,7 @@ object ClientState {
     var currentPlayerId: String = ""
     var remainingMoves: Int = 0
     var playerPositions: Map<String, String> = emptyMap() // playerId → Position
+    var currentPhase: String = ""
+    var currentPlayerIndex: Int = 0
 
 }

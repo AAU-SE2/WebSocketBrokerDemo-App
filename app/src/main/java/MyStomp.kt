@@ -181,6 +181,27 @@ class MyStomp(val callbacks: Callbacks) {
             }
         }
     }
+    fun endTurn() {
+        val payload = JSONObject()
+
+        val json = JSONObject()
+        json.put("type", "END_TURN")
+        json.put("payload", payload)
+
+        Log.d("MyStomp", "Sending END_TURN: $json")
+
+        scope.launch {
+            try {
+                if (::activeSession.isInitialized) {
+                    activeSession.sendText("/app/game", json.toString())
+                } else {
+                    callback("Error: Not connected")
+                }
+            } catch (e: Exception) {
+                Log.e("MyStomp", "END_TURN failed", e)
+            }
+        }
+    }
     fun setReady(characterType: String, isReady: Boolean) {
         val json = JSONObject()
         json.put("type", "SET_CHARACTER_TYPE_AND_STATUS_READY")
