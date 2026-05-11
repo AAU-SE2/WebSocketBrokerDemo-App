@@ -84,7 +84,31 @@ object LobbyHandler {
             LobbyMessageType.GAME_STARTED -> {
                 ClientState.currentPhase = payload.optString("currentPhase", "")
                 ClientState.currentPlayerIndex = payload.optInt("currentPlayerIndex", 0)
+                val playersArray = payload.optJSONArray("players")
+                if (playersArray != null) {
+                    for (i in 0 until playersArray.length()) {
+                        val playerObj = playersArray.getJSONObject(i)
+                        val pid = playerObj.getString("playerId")
 
+                        val existingPlayer = ClientState.players.find { it.playerId == pid }
+                        if (existingPlayer?.character != null) {
+                            ClientState.playerCharacterMap[pid] = existingPlayer.character!!
+                        }
+
+                        if (pid == ClientState.playerId) {
+                            val cardsArray = playerObj.optJSONArray("cards")
+                            if (cardsArray != null) {
+                                val cardIds = mutableListOf<String>()
+                                for (j in 0 until cardsArray.length()) {
+                                    val cardObj = cardsArray.getJSONObject(j)
+                                    cardIds.add(cardObj.getString("name"))
+                                }
+                                ClientState.myCards = cardIds
+                                ClientState.seenCards.addAll(cardIds)
+                            }
+                        }
+                    }
+                }
                 onGameStarted?.invoke()
                 }
             LobbyMessageType.START_GAME_ERROR -> {
