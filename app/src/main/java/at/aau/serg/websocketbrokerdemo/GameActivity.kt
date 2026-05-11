@@ -48,6 +48,78 @@ class GameActivity : ComponentActivity() {
         if (players.isEmpty() || ClientState.currentPlayerIndex >= players.size) return false
         return players[ClientState.currentPlayerIndex].playerId == ClientState.playerId
     }
+        private fun onSuggest() {
+            if (!isMyTurn() || ClientState.isEliminated) return
+            val pos = ClientState.playerPositions[ClientState.playerId] ?: ""
+            if (ClientState.currentPhase != "IN_ROOM" && ClientState.currentPhase != "WAITING_FOR_ROLL") return
+            if (!BoardConfig.ROOM_CENTERS_PERCENT.containsKey(pos)) return
+
+            dialogOverlay.visibility = View.VISIBLE
+            GameUIHelper.showCardSelectionOverlay(
+                this, dialogOverlay, "SUGGESTION",
+                includeRooms = false,
+                currentRoom = pos
+            ) { suspect, room, weapon ->
+                dialogOverlay.visibility = View.GONE
+                MyStomp.instance.makeSuggestion(suspect, room, weapon)
+            }
+        }
+
+        private fun onAccuse() {
+            if (!isMyTurn() || ClientState.isEliminated) return
+            val pos = ClientState.playerPositions[ClientState.playerId] ?: ""
+            if (ClientState.currentPhase != "IN_ROOM" && ClientState.currentPhase != "WAITING_FOR_ROLL") return
+            if (!BoardConfig.ROOM_CENTERS_PERCENT.containsKey(pos)) return
+
+            dialogOverlay.visibility = View.VISIBLE
+            GameUIHelper.showCardSelectionOverlay(
+                this, dialogOverlay, "ACCUSATION",
+                includeRooms = true,
+                currentRoom = null
+            ) { suspect, room, weapon ->
+                dialogOverlay.visibility = View.GONE
+                MyStomp.instance.makeAccusation(suspect, room, weapon)
+            }
+        }
+
     private fun setupGameHandlers() {
+        GameHandler.onSuggestionResult = { suggesterID, suspect, room, weapon, matchingCards ->
+            runOnUiThread {
+                GameUIHelper.showSuggestionTimer(this, rootLayout) {
+                    // Only show matching cards to the SUGGESTER
+                    if (suggesterID == ClientState.playerId) {
+                        if (matchingCards.isNotEmpty()) {
+                            GameUIHelper.showResultCards(this, rootLayout, matchingCards)
+                        } else {
+                            Toast.makeText(this, getString(R.string.no_matching_cards), Toast.LENGTH_SHORT).show()
+                        }
+                        updateChecklist()
+                    } else {
+                        Toast.makeText(this, getString(R.string.suggestion_made, "${suggesterID.take(8)}..."), Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+
+        GameHandler.onAccusation = { accuserID, suspect, room, weapon, correct, eliminated ->
+            runOnUiThread {
+                // All players see the accusation cards
+                GameUIHelper.showResultCards(this, rootLayout, listOf(suspect, weapon, room), 3000)
+                if (correct) {
+                    val msg = if (accuserID == ClientState.playerId) getString(R.string.you_won) else getString(R.string.player_won, "${accuserID.take(8)}...")
+                    android.os.Handler(mainLooper).postDelayed({
+                        GameUIHelper.showGameEndOverlay(this, rootLayout, msg)
+                    }, 3500)
+                } else if (eliminated) {
+                    // Only show elimination message, differentiate by playerId
+                    if (accuserID == ClientState.playerId) {
+                        Toast.makeText(this, getString(R.string.wrong_accusation), Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(this, getString(R.string.player_eliminated, "${accuserID.take(8)}..."), Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
     }
 }
