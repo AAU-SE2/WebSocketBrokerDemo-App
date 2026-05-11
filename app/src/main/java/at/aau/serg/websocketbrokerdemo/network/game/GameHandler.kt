@@ -64,8 +64,8 @@ class GameHandler {
                     GameMessageType.SUGGESTION_RESULT,
                     GameMessageType.SUGGESTION_ERROR,
                     GameMessageType.GAME_FINISHED,
-                    GameMessageType.GAME_ABORTED -> {
-                    }
+                    GameMessageType.GAME_ABORTED -> Unit
+
                 }
             } catch (e: Exception) {
                 Log.e("GameHandler", "Error handling message", e)
