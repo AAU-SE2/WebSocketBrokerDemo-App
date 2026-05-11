@@ -31,15 +31,27 @@ object LobbyHandler {
         when (type) {
             LobbyMessageType.NEW_PLAYER_JOINED -> {
                 val dto = parseNewPlayerJoined(payload)
-                ClientState.players = dto.existingPlayers   // zwischenspeichern
+                ClientState.players = dto.existingPlayers
                 ClientState.availableCharacters = dto.availableCharacters
-                onLobbyJoined?.invoke()
-                onNewPlayerJoined?.invoke(dto)              // Activity benachrichtigen
+
+                // Nur wenn ICH der neue Spieler bin, und nur einmal
+                if (dto.playerId == ClientState.playerId) {
+                    onLobbyJoined?.invoke()
+                }
+
+                onNewPlayerJoined?.invoke(dto)
             }
             LobbyMessageType.PLAYER_REJOINED -> {
                 val dto = parsePlayerRejoined(payload)
                 ClientState.players = dto.existingPlayers
-                onLobbyJoined?.invoke()
+                if (dto.availableCharacters.isNotEmpty()) {
+                    ClientState.availableCharacters = dto.availableCharacters
+                }
+
+                if (dto.playerId == ClientState.playerId) {
+                    onLobbyJoined?.invoke()
+                }
+
                 onPlayerRejoined?.invoke(dto)
             }
             LobbyMessageType.GAME_FULL -> {
@@ -133,6 +145,7 @@ object LobbyHandler {
             existingPlayers = parsePlayers(payload)
         )
     }
+
 
 
 }
