@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-   >
+    >
 
     <ImageView
         android:id="@+id/imageView"
@@ -142,6 +142,42 @@
         app:layout_constraintTop_toTopOf="@id/imgMyCharacter"
         app:layout_constraintStart_toStartOf="@id/imgMyCharacter"
         app:layout_constraintEnd_toEndOf="@id/imgMyCharacter" />
+
+    <ImageView
+        android:id="@+id/imgReadyCheck2"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:src="@android:drawable/checkbox_on_background"
+        android:backgroundTint="#00CC00"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/imgOtherPlayerCharacter2"
+        app:layout_constraintTop_toTopOf="@id/imgOtherPlayerCharacter2"
+        app:layout_constraintStart_toStartOf="@id/imgOtherPlayerCharacter2"
+        app:layout_constraintEnd_toEndOf="@id/imgOtherPlayerCharacter2" />
+
+    <ImageView
+        android:id="@+id/imgReadyCheck3"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:src="@android:drawable/checkbox_on_background"
+        android:backgroundTint="#00CC00"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/imgOtherPlayerCharacter3"
+        app:layout_constraintTop_toTopOf="@id/imgOtherPlayerCharacter3"
+        app:layout_constraintStart_toStartOf="@id/imgOtherPlayerCharacter3"
+        app:layout_constraintEnd_toEndOf="@id/imgOtherPlayerCharacter3" />
+
+    <ImageView
+        android:id="@+id/imgReadyCheck4"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:src="@android:drawable/checkbox_on_background"
+        android:backgroundTint="#00CC00"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/imgOtherPlayerCharacter4"
+        app:layout_constraintTop_toTopOf="@id/imgOtherPlayerCharacter4"
+        app:layout_constraintStart_toStartOf="@id/imgOtherPlayerCharacter4"
+        app:layout_constraintEnd_toEndOf="@id/imgOtherPlayerCharacter4" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
