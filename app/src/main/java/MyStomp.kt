@@ -203,4 +203,26 @@ class MyStomp(val callbacks: Callbacks) {
         }
     }
 
+    private fun sendGameMessage(type: String, buildPayload: (JSONObject) -> Unit) {
+        val payload = JSONObject()
+        buildPayload(payload)
+
+        val json = JSONObject()
+        json.put("type", type)
+        json.put("payload", payload)
+
+        Log.d("MyStomp", "Sending $type: $json")
+
+        scope.launch {
+            try {
+                if (::activeSession.isInitialized) {
+                    activeSession.sendText(GAME_DESTINATION, json.toString())
+                } else {
+                    callback("Error: Not connected")
+                }
+            } catch (e: Exception) {
+                Log.e("MyStomp", "$type failed", e)
+            }
+        }
+    }
 }
