@@ -10,6 +10,9 @@ object ClientState {
     var myCards: List<String> = emptyList()
     var myCharacter: String? = null
 
+    // Checklist
+    var seenCards: MutableSet<String> = mutableSetOf()
+
     // Spielerliste
     var players: List<ExistingPlayerDTO> = emptyList()
 
