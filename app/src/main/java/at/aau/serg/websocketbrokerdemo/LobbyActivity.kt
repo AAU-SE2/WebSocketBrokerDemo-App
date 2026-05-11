@@ -23,9 +23,6 @@ class LobbyActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lobby)
-        ClientState.playerId = UUID.randomUUID().toString()
-       // Log.d("DEBUG", "PLAYER_ID = ${ClientState.playerId}")
-       // MyStomp.instance.connect()
         LobbyHandler.onGameStarted = {
             runOnUiThread {
                 val intent = Intent(this, GameActivity::class.java)
@@ -37,7 +34,6 @@ class LobbyActivity : ComponentActivity() {
                 Toast.makeText(this, reason, Toast.LENGTH_SHORT).show()
             }
         }
-        MyStomp.instance.connect()
         val imgMyCharacter = findViewById<ImageView>(R.id.imgMyCharacter)
 
         val btnPrev = findViewById<ImageButton>(R.id.btnPrev)
@@ -52,27 +48,38 @@ class LobbyActivity : ComponentActivity() {
             findViewById<ImageView>(R.id.imgOtherPlayerCharacter4)
         )
 
-        // NEU: beim Start direkt aus ClientState laden
+        val otherReadyChecks = listOf(
+            findViewById<ImageView>(R.id.imgReadyCheck2),
+            findViewById<ImageView>(R.id.imgReadyCheck3),
+            findViewById<ImageView>(R.id.imgReadyCheck4)
+        )
+
         availableCharacters = ClientState.availableCharacters.toList()
 
         Log.d("LOBBY", "INIT characters = $availableCharacters")
-/*
-        currentCharacterIndex = 0
-        updateMyCharacterImage(imgMyCharacter)
-        updateOtherPlayers(ClientState.players, otherPlayerViews)
 
- */
-        currentCharacterIndex = 0
-        if (availableCharacters.isNotEmpty()) {
-            ClientState.myCharacter = availableCharacters[0] // ← ADD
+        val me = ClientState.players.find { it.playerId == ClientState.playerId }
+        if (me != null && me.character != null) {
+            ClientState.myCharacter = me.character
+            if (me.ready) {
+                isReady = true
+                lockCharacterSelection()
+            }
+        } else {
+            currentCharacterIndex = 0
+            if (availableCharacters.isNotEmpty()) {
+                ClientState.myCharacter = availableCharacters[0]
+            }
         }
         updateMyCharacterImage(imgMyCharacter)
+        updateOtherPlayers(ClientState.players, otherPlayerViews, otherReadyChecks)
+
         btnNext.setOnClickListener {
             if (availableCharacters.isEmpty()) return@setOnClickListener
 
             currentCharacterIndex =
                 (currentCharacterIndex + 1) % availableCharacters.size
-            ClientState.myCharacter = availableCharacters[currentCharacterIndex] // ← ADD
+            ClientState.myCharacter = availableCharacters[currentCharacterIndex]
             updateMyCharacterImage(imgMyCharacter)
         }
         btnPrev.setOnClickListener {
@@ -80,7 +87,7 @@ class LobbyActivity : ComponentActivity() {
 
             currentCharacterIndex =
                 (currentCharacterIndex - 1 + availableCharacters.size) % availableCharacters.size
-            ClientState.myCharacter = availableCharacters[currentCharacterIndex] // ← ADD
+            ClientState.myCharacter = availableCharacters[currentCharacterIndex]
 
             updateMyCharacterImage(imgMyCharacter)
         }
@@ -100,10 +107,12 @@ class LobbyActivity : ComponentActivity() {
         btnLeave.setOnClickListener {
             if (isLeaving) return@setOnClickListener
             isLeaving = true
+            btnLeave.isEnabled = false
             MyStomp.instance.leaveLobby()
+            MyStomp.instance.disconnect()
             finish()
+            isLeaving = false
         }
-// ---------------------------------lobbyHandler -----------------------------------
         LobbyHandler.onNewPlayerJoined = { dto ->
             runOnUiThread {
                 ClientState.players = dto.existingPlayers
@@ -113,20 +122,13 @@ class LobbyActivity : ComponentActivity() {
                 }
 
                 Log.d("LOBBY", "UPDATED characters = $availableCharacters")
-/*
-                currentCharacterIndex = 0
+
+                if (availableCharacters.isNotEmpty() && !isReady) {
+                    ClientState.myCharacter = availableCharacters[0]
+                }
 
                 updateMyCharacterImage(imgMyCharacter)
-                updateOtherPlayers(dto.existingPlayers, otherPlayerViews)
-
-
- */
-                if (availableCharacters.isNotEmpty()) {
-                ClientState.myCharacter = availableCharacters[0]
-            }
-
-                updateMyCharacterImage(imgMyCharacter)
-                updateOtherPlayers(dto.existingPlayers, otherPlayerViews)
+                updateOtherPlayers(dto.existingPlayers, otherPlayerViews, otherReadyChecks)
             }
 
 
@@ -143,7 +145,7 @@ class LobbyActivity : ComponentActivity() {
                 }
 
                 updateMyCharacterImage(imgMyCharacter)
-                updateOtherPlayers(dto.existingPlayers, otherPlayerViews)
+                updateOtherPlayers(dto.existingPlayers, otherPlayerViews, otherReadyChecks)
             }
         }
 
@@ -155,7 +157,7 @@ class LobbyActivity : ComponentActivity() {
             runOnUiThread {
                 val updated = ClientState.players.filter { it.playerId != playerId }
                 ClientState.players = updated
-                updateOtherPlayers(updated, otherPlayerViews)
+                updateOtherPlayers(updated, otherPlayerViews, otherReadyChecks)
             }
         }
 
@@ -195,16 +197,16 @@ class LobbyActivity : ComponentActivity() {
 
     private fun updateOtherPlayers(
         players: List<ExistingPlayerDTO>,
-        views: List<ImageView>
+        views: List<ImageView>,
+        readyChecks: List<ImageView>
     ) {
         val others = players.filter { it.playerId != ClientState.playerId }
 
-        // Alle Views zuerst leeren
         views.forEach { it.setImageDrawable(null) }
+        readyChecks.forEach { it.visibility = View.GONE }
 
-        // Jeden anderen Spieler in eine View einsetzen
         others.forEachIndexed { index, player ->
-            if (index >= views.size) return
+            if (index >= views.size) return@forEachIndexed
 
             val card = player.character?.let {
                 CardRepository.cards.find { c -> c.cardId == it }
@@ -213,15 +215,8 @@ class LobbyActivity : ComponentActivity() {
             views[index].setImageResource(
                 card?.imageResId ?: android.R.drawable.ic_menu_help
             )
+            readyChecks[index].visibility = if (player.ready) View.VISIBLE else View.GONE
         }
 
     }
-    /*
-    private fun getMyCharacter(): String? {
-        return ClientState.players
-            .find { it.playerId == ClientState.playerId }
-            ?.character
-    }
-
-     */
 }
