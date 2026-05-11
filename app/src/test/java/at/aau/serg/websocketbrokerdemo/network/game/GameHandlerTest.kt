@@ -73,25 +73,28 @@ class GameHandlerTest {
 
     @Test
     fun `END_TURN calls callback`() = handle {
-        var prev = -1
-        var next = -1
-        GameHandler.onEndTurn = { p, n -> prev = p; next = n }
-        GameHandler.handle("""{ "type": "END_TURN", "payload": { "previousPlayerIndex": 1, "nextPlayerIndex": 2 } }""")
-        Assertions.assertEquals(1, prev)
-        Assertions.assertEquals(2, next)
+        var currentPlayerIndex = -1
+
+        GameHandler.onEndTurn = { index ->
+            currentPlayerIndex = index
+        }
+        GameHandler.handle("""{ "type": "END_TURN", "payload": { "currentPlayerIndex": 2 } }""")
+        Assertions.assertEquals(2, currentPlayerIndex)
     }
 
     @Test
     fun `END_TURN returns when previous missing`() = handle {
         var called = false
-        GameHandler.onEndTurn = { _, _ -> called = true }
-        GameHandler.handle("""{ "type": "END_TURN", "payload": { "nextPlayerIndex": 2 } }""")
+        GameHandler.onEndTurn = {
+            called = true
+        }
+        GameHandler.handle("""{ "type": "END_TURN", "payload": { } }""")
         Assertions.assertFalse(called)
     }
 
     @Test
     fun `END_TURN no callback set does not crash`() = handle {
-        GameHandler.handle("""{ "type": "END_TURN", "payload": { "previousPlayerIndex": 1, "nextPlayerIndex": 2 } }""")
+        GameHandler.handle("""{ "type": "END_TURN", "payload": { "currentPlayerIndex": 2 } }""")
         Assertions.assertTrue(true)
     }
 

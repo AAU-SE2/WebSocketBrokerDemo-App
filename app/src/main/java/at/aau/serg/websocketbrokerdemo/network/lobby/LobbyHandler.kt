@@ -70,8 +70,11 @@ object LobbyHandler {
                 onSetReady?.invoke(dto)
             }
             LobbyMessageType.GAME_STARTED -> {
+                ClientState.currentPhase = payload.optString("currentPhase", "")
+                ClientState.currentPlayerIndex = payload.optInt("currentPlayerIndex", 0)
+
                 onGameStarted?.invoke()
-            }
+                }
             LobbyMessageType.START_GAME_ERROR -> {
                 val reason = payload.optString("reason", "Game could not be started")
                 onStartGameError?.invoke(reason)
