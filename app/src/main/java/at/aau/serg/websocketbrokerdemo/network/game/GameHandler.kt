@@ -61,6 +61,11 @@ class GameHandler {
                         val raw = payload?.toString() ?: return
                         onSuggestion?.invoke(raw)
                     }
+                    GameMessageType.SUGGESTION_RESULT,
+                    GameMessageType.SUGGESTION_ERROR,
+                    GameMessageType.GAME_FINISHED,
+                    GameMessageType.GAME_ABORTED -> {
+                    }
                 }
             } catch (e: Exception) {
                 Log.e("GameHandler", "Error handling message", e)
