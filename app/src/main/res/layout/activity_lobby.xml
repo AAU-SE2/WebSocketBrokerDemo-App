@@ -24,8 +24,10 @@
         android:id="@+id/btnLeave"
         android:layout_width="143dp"
         android:layout_height="31dp"
-        android:alpha="0"
-        android:text="leave"
+        android:alpha="1"
+        android:background="@drawable/transparent_button_bg"
+        android:textColor="#FFFFFF"
+        android:stateListAnimator="@null"
 
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -38,8 +40,11 @@
         android:id="@+id/btnReady"
         android:layout_width="146dp"
         android:layout_height="35dp"
-        android:alpha="0"
-        android:text="Ready"
+        android:alpha="1"
+        android:background="@drawable/transparent_button_bg"
+        android:textColor="#FFFFFF"
+        android:stateListAnimator="@null"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.107"
@@ -51,8 +56,10 @@
         android:id="@+id/btnStartGame"
         android:layout_width="141dp"
         android:layout_height="38dp"
-        android:alpha="0"
-        android:text="Start Game"
+        android:alpha="1"
+        android:background="@drawable/transparent_button_bg"
+        android:textColor="#FFFFFF"
+        android:stateListAnimator="@null"
 
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -66,7 +73,8 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:src="@android:drawable/ic_media_previous"
-        android:background="@android:color/transparent"
+        android:backgroundTint="#66FFFFFF"
+        android:alpha="0.7"
         app:layout_constraintBottom_toBottomOf="@id/imgMyCharacter"
         app:layout_constraintTop_toTopOf="@id/imgMyCharacter"
         app:layout_constraintEnd_toStartOf="@id/imgMyCharacter" />
@@ -117,10 +125,23 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:src="@android:drawable/ic_media_next"
-        android:background="@android:color/transparent"
+        android:backgroundTint="#66FFFFFF"
+        android:alpha="0.7"
         app:layout_constraintBottom_toBottomOf="@id/imgMyCharacter"
         app:layout_constraintTop_toTopOf="@id/imgMyCharacter"
         app:layout_constraintStart_toEndOf="@id/imgMyCharacter" />
+
+    <ImageView
+        android:id="@+id/imgReadyCheck"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:src="@android:drawable/checkbox_on_background"
+        android:backgroundTint="#00CC00"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/imgMyCharacter"
+        app:layout_constraintTop_toTopOf="@id/imgMyCharacter"
+        app:layout_constraintStart_toStartOf="@id/imgMyCharacter"
+        app:layout_constraintEnd_toEndOf="@id/imgMyCharacter" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
