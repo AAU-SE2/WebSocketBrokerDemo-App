@@ -5,9 +5,48 @@ import androidx.activity.ComponentActivity
 import com.example.myapplication.R
 
 class GameActivity : ComponentActivity() {
+    private lateinit var rootLayout: ViewGroup
+    private lateinit var boardImage: ImageView
+    private lateinit var gridOverlay: ViewGroup
+
+    private lateinit var checklistOverlay: ViewGroup
+    private lateinit var characterPanel: androidx.constraintlayout.widget.ConstraintLayout
+
+    private lateinit var dialogOverlay: ViewGroup
+
+    private val playerDots = mutableMapOf<String, View>()
+    private val characterHighlights = mutableMapOf<String, View>()
+    private var currentRoomId: String? = null
+    private var hiddenWayUsed = false
+    private var boardSetupDone = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
+
+        rootLayout = findViewById(R.id.rootGameLayout)
+        boardImage = findViewById(R.id.imgBoard)
+        gridOverlay = findViewById(R.id.gridOverlay)
+        checklistOverlay = findViewById(R.id.checklistOverlay)
+        characterPanel = findViewById(R.id.characterPanel)
+
+        dialogOverlay = findViewById(R.id.dialogOverlay)
+
+        setupGameHandlers()
+        initializePlayerPositions()
+
+        findViewById<Button>(R.id.btnRollDice).setOnClickListener { onRollDice() }
+        findViewById<Button>(R.id.btnHiddenWay).setOnClickListener { onHiddenWay() }
+        findViewById<Button>(R.id.btnSuggest).setOnClickListener { onSuggest() }
+        findViewById<Button>(R.id.btnAccuse).setOnClickListener { onAccuse() }
+        findViewById<Button>(R.id.btnLeave).setOnClickListener { onLeaveGame() }
+
+        boardImage.post {
+            if (!boardSetupDone) {
+                boardSetupDone = true
+                setupBoard()
+            }
+        }
     }
 
     private fun setupBoard() {
@@ -30,12 +69,14 @@ class GameActivity : ComponentActivity() {
         for (row in 0 until BoardConfig.ROWS) {
             for (col in 0 until BoardConfig.COLS) {
                 val cell = View(this)
-                val clp = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams(cellW, cellH).apply {
-                    startToStart = androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
-                    topToTop = androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
-                    leftMargin = col * cellW
-                    topMargin = row * cellH
-                }
+                val clp =
+                    androidx.constraintlayout.widget.ConstraintLayout.LayoutParams(cellW, cellH)
+                        .apply {
+                            startToStart = androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
+                            topToTop = androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
+                            leftMargin = col * cellW
+                            topMargin = row * cellH
+                        }
                 cell.layoutParams = clp
                 cell.setBackgroundColor(Color.TRANSPARENT)
                 cell.setOnClickListener { onCellTapped(col, row) }
@@ -43,11 +84,12 @@ class GameActivity : ComponentActivity() {
             }
         }
 
-    private fun isMyTurn(): Boolean {
-        val players = ClientState.players
-        if (players.isEmpty() || ClientState.currentPlayerIndex >= players.size) return false
-        return players[ClientState.currentPlayerIndex].playerId == ClientState.playerId
-    }
+        private fun isMyTurn(): Boolean {
+            val players = ClientState.players
+            if (players.isEmpty() || ClientState.currentPlayerIndex >= players.size) return false
+            return players[ClientState.currentPlayerIndex].playerId == ClientState.playerId
+        }
+
         private fun onSuggest() {
             if (!isMyTurn() || ClientState.isEliminated) return
             val pos = ClientState.playerPositions[ClientState.playerId] ?: ""
@@ -81,6 +123,7 @@ class GameActivity : ComponentActivity() {
                 MyStomp.instance.makeAccusation(suspect, room, weapon)
             }
         }
+    }
 
     private fun setupGameHandlers() {
         GameHandler.onSuggestionResult = { suggesterID, suspect, room, weapon, matchingCards ->
@@ -121,5 +164,23 @@ class GameActivity : ComponentActivity() {
             }
         }
     }
+    private fun updateChecklist() {
+        val checklistFrame = findViewById<ViewGroup>(R.id.checklistFrame) ?: return
+        checklistFrame.post {
+            GameUIHelper.buildChecklistOverlay(
+                this, checklistOverlay,
+                checklistFrame.width, checklistFrame.height
+            )
+        }
+    }
+
+    private fun updateCurrentPlayerHighlight() {
+        val players = ClientState.players
+        val currentPid = if (players.isNotEmpty() && ClientState.currentPlayerIndex < players.size)
+            players[ClientState.currentPlayerIndex].playerId else ""
+
+        characterHighlights.forEach { (pid, view) ->
+            view.visibility = if (pid == currentPid) View.VISIBLE else View.GONE
+        }
     }
 }
