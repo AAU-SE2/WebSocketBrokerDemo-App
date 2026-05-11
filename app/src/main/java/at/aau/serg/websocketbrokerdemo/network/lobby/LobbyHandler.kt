@@ -21,6 +21,8 @@ object LobbyHandler {
     // setready
     //var onSetReady: ((NewPlayerJoinedPayload) -> Unit)? = null
     var onSetReady: ((SetreadyDTO) -> Unit)? = null
+    var onGameStarted: (() -> Unit)? = null
+    var onStartGameError: ((String) -> Unit)? = null
     fun handle(msg: String) {
         val json = JSONObject(msg)
         val type = LobbyMessageType.valueOf(json.getString("type"))
@@ -67,7 +69,16 @@ object LobbyHandler {
 
                 onSetReady?.invoke(dto)
             }
+            LobbyMessageType.GAME_STARTED -> {
+                ClientState.currentPhase = payload.optString("currentPhase", "")
+                ClientState.currentPlayerIndex = payload.optInt("currentPlayerIndex", 0)
 
+                onGameStarted?.invoke()
+                }
+            LobbyMessageType.START_GAME_ERROR -> {
+                val reason = payload.optString("reason", "Game could not be started")
+                onStartGameError?.invoke(reason)
+            }
         }
     }
 
@@ -102,7 +113,9 @@ object LobbyHandler {
             ExistingPlayerDTO(
                 playerId = p.getString("playerId"),
                 ready = p.getBoolean("ready"),
-                character = p.optString("character").takeIf { it.isNotEmpty() },
+                character = p.optString("characterType")
+                    .ifEmpty { p.optString("character") }
+                    .takeIf { it.isNotEmpty() },
                 position = p.optString("position").takeIf { it.isNotEmpty() }
             )
         }

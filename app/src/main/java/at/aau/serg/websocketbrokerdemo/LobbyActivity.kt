@@ -25,6 +25,18 @@ class LobbyActivity : ComponentActivity() {
         setContentView(R.layout.activity_lobby)
         ClientState.playerId = UUID.randomUUID().toString()
        // Log.d("DEBUG", "PLAYER_ID = ${ClientState.playerId}")
+       // MyStomp.instance.connect()
+        LobbyHandler.onGameStarted = {
+            runOnUiThread {
+                val intent = Intent(this, GameActivity::class.java)
+                startActivity(intent)
+            }
+        }
+        LobbyHandler.onStartGameError = { reason ->
+            runOnUiThread {
+                Toast.makeText(this, reason, Toast.LENGTH_SHORT).show()
+            }
+        }
         MyStomp.instance.connect()
         val imgMyCharacter = findViewById<ImageView>(R.id.imgMyCharacter)
 
@@ -82,7 +94,7 @@ class LobbyActivity : ComponentActivity() {
         }
 
         btnStartGame.setOnClickListener {
-            startActivity(Intent(this, GameActivity::class.java))
+            MyStomp.instance.startGame()
         }
 
         btnLeave.setOnClickListener {

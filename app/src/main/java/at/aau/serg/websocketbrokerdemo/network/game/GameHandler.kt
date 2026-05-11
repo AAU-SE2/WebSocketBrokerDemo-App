@@ -2,13 +2,14 @@ package at.aau.serg.websocketbrokerdemo.network.game
 
 import android.util.Log
 import at.aau.serg.websocketbrokerdemo.messaging.dtos.GameMessageType
+import at.aau.serg.websocketbrokerdemo.model.ClientState
 import org.json.JSONObject
 
 class GameHandler {
     companion object {
         var onRollDice: ((Int) -> Unit)? = null
         var onMove: ((String, String) -> Unit)? = null
-        var onEndTurn: ((Int, Int) -> Unit)? = null
+        var onEndTurn: ((Int) -> Unit)? = null
         var onEnterRoom: ((String) -> Unit)? = null
         var onHiddenWay: (() -> Unit)? = null
         var onAccusation: ((String) -> Unit)? = null
@@ -35,9 +36,11 @@ class GameHandler {
                     }
 
                     GameMessageType.END_TURN -> {
-                        val previous = payload?.getInt("previousPlayerIndex") ?: return
-                        val next = payload.getInt("nextPlayerIndex")
-                        onEndTurn?.invoke(previous, next)
+                        val currentPlayerIndex = payload?.getInt("currentPlayerIndex") ?: return
+
+                        ClientState.currentPlayerIndex = currentPlayerIndex
+
+                        onEndTurn?.invoke(currentPlayerIndex)
                     }
 
                     GameMessageType.ENTER_ROOM -> {
@@ -58,6 +61,11 @@ class GameHandler {
                         val raw = payload?.toString() ?: return
                         onSuggestion?.invoke(raw)
                     }
+                    GameMessageType.SUGGESTION_RESULT,
+                    GameMessageType.SUGGESTION_ERROR,
+                    GameMessageType.GAME_FINISHED,
+                    GameMessageType.GAME_ABORTED -> Unit
+
                 }
             } catch (e: Exception) {
                 Log.e("GameHandler", "Error handling message", e)

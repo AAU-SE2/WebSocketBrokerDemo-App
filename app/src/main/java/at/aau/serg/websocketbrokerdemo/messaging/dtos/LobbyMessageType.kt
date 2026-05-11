@@ -6,5 +6,7 @@ enum class LobbyMessageType {
     GAME_FULL,
     PLAYER_REMOVED,
     SET_CHARACTER_TYPE_AND_STATUS_READY,
+    GAME_STARTED,
+    START_GAME_ERROR
 
 }
