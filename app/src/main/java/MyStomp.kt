@@ -225,4 +225,22 @@ class MyStomp(val callbacks: Callbacks) {
             }
         }
     }
+
+    fun makeSuggestion(suspect: String, room: String, weapon: String) {
+        sendGameMessage("MAKE_SUGGESTION") { payload ->
+            payload.put("suggesterID", ClientState.playerId)
+            payload.put("suspect", suspect)
+            payload.put("room", room)
+            payload.put("weapon", weapon)
+        }
+    }
+
+    fun makeAccusation(suspect: String, room: String, weapon: String) {
+        sendGameMessage("MAKE_ACCUSATION") { payload ->
+            payload.put("accuserID", ClientState.playerId)
+            payload.put("suspect", suspect)
+            payload.put("room", room)
+            payload.put("weapon", weapon)
+        }
+    }
 }
