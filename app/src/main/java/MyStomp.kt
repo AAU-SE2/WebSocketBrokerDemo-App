@@ -203,6 +203,33 @@ class MyStomp(val callbacks: Callbacks) {
         }
     }
 
+    fun rollDice() {
+        sendGameMessage("ROLL_DICE") { payload ->
+            payload.put("playerId", ClientState.playerId)
+        }
+    }
+
+    fun move(position: String) {
+        sendGameMessage("MOVE") { payload ->
+            payload.put("playerId", ClientState.playerId)
+            payload.put("position", position)
+        }
+    }
+
+    fun enterRoom(roomId: String) {
+        sendGameMessage("ENTER_ROOM") { payload ->
+            payload.put("playerId", ClientState.playerId)
+            payload.put("roomId", roomId)
+        }
+    }
+
+    fun takeHiddenWay() {
+        sendGameMessage("TAKE_HIDDEN_WAY") { payload ->
+            payload.put("playerId", ClientState.playerId)
+        }
+    }
+
+
     private fun sendGameMessage(type: String, buildPayload: (JSONObject) -> Unit) {
         val payload = JSONObject()
         buildPayload(payload)
