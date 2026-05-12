@@ -34,7 +34,6 @@ object LobbyHandler {
                 ClientState.players = dto.existingPlayers
                 ClientState.availableCharacters = dto.availableCharacters
 
-                // Nur wenn ICH der neue Spieler bin, und nur einmal
                 if (dto.playerId == ClientState.playerId) {
                     onLobbyJoined?.invoke()
                 }
@@ -65,15 +64,7 @@ object LobbyHandler {
                     onOtherPlayerRemoved?.invoke(playerId)  //       anderer Spieler
                 }
             }
-            // setready
             LobbyMessageType.SET_CHARACTER_TYPE_AND_STATUS_READY -> {
-            /*
-                val dto =parseNewPlayerJoined(payload)
-                ClientState.players = dto.existingPlayers
-                ClientState.availableCharacters = dto.availableCharacters
-                onSetReady?.invoke(dto)
-
-            */
                 val dto = parseSetReady(payload)
 
                 ClientState.players = dto.existingPlayers
@@ -129,9 +120,15 @@ object LobbyHandler {
     }
 
     private fun parsePlayerRejoined(payload: JSONObject): PlayerRejoinedPayload {
+        val availChars = payload.optJSONArray("availableCharacters")
+        val characters = if (availChars != null) {
+            (0 until availChars.length()).map { availChars.getString(it) }
+        } else emptyList()
+
         return PlayerRejoinedPayload(
             playerId = payload.getString("playerId"),
-            existingPlayers = parsePlayers(payload)
+            existingPlayers = parsePlayers(payload),
+            availableCharacters = characters
         )
     }
 
@@ -169,7 +166,4 @@ object LobbyHandler {
             existingPlayers = parsePlayers(payload)
         )
     }
-
-
-
 }
