@@ -31,15 +31,26 @@ object LobbyHandler {
         when (type) {
             LobbyMessageType.NEW_PLAYER_JOINED -> {
                 val dto = parseNewPlayerJoined(payload)
-                ClientState.players = dto.existingPlayers   // zwischenspeichern
+                ClientState.players = dto.existingPlayers
                 ClientState.availableCharacters = dto.availableCharacters
-                onLobbyJoined?.invoke()
-                onNewPlayerJoined?.invoke(dto)              // Activity benachrichtigen
+
+                if (dto.playerId == ClientState.playerId) {
+                    onLobbyJoined?.invoke()
+                }
+
+                onNewPlayerJoined?.invoke(dto)
             }
             LobbyMessageType.PLAYER_REJOINED -> {
                 val dto = parsePlayerRejoined(payload)
                 ClientState.players = dto.existingPlayers
-                onLobbyJoined?.invoke()
+                if (dto.availableCharacters.isNotEmpty()) {
+                    ClientState.availableCharacters = dto.availableCharacters
+                }
+
+                if (dto.playerId == ClientState.playerId) {
+                    onLobbyJoined?.invoke()
+                }
+
                 onPlayerRejoined?.invoke(dto)
             }
             LobbyMessageType.GAME_FULL -> {
@@ -53,15 +64,7 @@ object LobbyHandler {
                     onOtherPlayerRemoved?.invoke(playerId)  //       anderer Spieler
                 }
             }
-            // setready
             LobbyMessageType.SET_CHARACTER_TYPE_AND_STATUS_READY -> {
-            /*
-                val dto =parseNewPlayerJoined(payload)
-                ClientState.players = dto.existingPlayers
-                ClientState.availableCharacters = dto.availableCharacters
-                onSetReady?.invoke(dto)
-
-            */
                 val dto = parseSetReady(payload)
 
                 ClientState.players = dto.existingPlayers
@@ -72,7 +75,31 @@ object LobbyHandler {
             LobbyMessageType.GAME_STARTED -> {
                 ClientState.currentPhase = payload.optString("currentPhase", "")
                 ClientState.currentPlayerIndex = payload.optInt("currentPlayerIndex", 0)
+                val playersArray = payload.optJSONArray("players")
+                if (playersArray != null) {
+                    for (i in 0 until playersArray.length()) {
+                        val playerObj = playersArray.getJSONObject(i)
+                        val pid = playerObj.getString("playerId")
 
+                        val existingPlayer = ClientState.players.find { it.playerId == pid }
+                        if (existingPlayer?.character != null) {
+                            ClientState.playerCharacterMap[pid] = existingPlayer.character!!
+                        }
+
+                        if (pid == ClientState.playerId) {
+                            val cardsArray = playerObj.optJSONArray("cards")
+                            if (cardsArray != null) {
+                                val cardIds = mutableListOf<String>()
+                                for (j in 0 until cardsArray.length()) {
+                                    val cardObj = cardsArray.getJSONObject(j)
+                                    cardIds.add(cardObj.getString("name"))
+                                }
+                                ClientState.myCards = cardIds
+                                ClientState.seenCards.addAll(cardIds)
+                            }
+                        }
+                    }
+                }
                 onGameStarted?.invoke()
                 }
             LobbyMessageType.START_GAME_ERROR -> {
@@ -93,9 +120,15 @@ object LobbyHandler {
     }
 
     private fun parsePlayerRejoined(payload: JSONObject): PlayerRejoinedPayload {
+        val availChars = payload.optJSONArray("availableCharacters")
+        val characters = if (availChars != null) {
+            (0 until availChars.length()).map { availChars.getString(it) }
+        } else emptyList()
+
         return PlayerRejoinedPayload(
             playerId = payload.getString("playerId"),
-            existingPlayers = parsePlayers(payload)
+            existingPlayers = parsePlayers(payload),
+            availableCharacters = characters
         )
     }
 
@@ -133,6 +166,4 @@ object LobbyHandler {
             existingPlayers = parsePlayers(payload)
         )
     }
-
-
 }

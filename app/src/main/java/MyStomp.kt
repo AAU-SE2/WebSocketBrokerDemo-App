@@ -20,6 +20,7 @@ import org.json.JSONObject
 
 private const val WEBSOCKET_URI = "ws://10.0.2.2:8080/websocket-example-broker"
 private const val LOBBY_DESTINATION = "/app/lobby"
+private const val GAME_DESTINATION = "/app/game"
 class MyStomp(val callbacks: Callbacks) {
     private var lobbyFlow: Flow<String>? = null
     private var lobbyCollector: Job? = null
@@ -94,6 +95,23 @@ class MyStomp(val callbacks: Callbacks) {
         }
     }
 
+    fun disconnect() {
+        scope.launch {
+            try {
+                lobbyCollector?.cancel()
+                lobbyCollector = null
+                gameCollector?.cancel()
+                gameCollector = null
+                if (::activeSession.isInitialized) {
+                    activeSession.disconnect()
+                }
+                Log.d("MyStomp", "Disconnected successfully")
+            } catch (e: Exception) {
+                Log.e("MyStomp", "Disconnect failed", e)
+            }
+        }
+    }
+
 
     fun leaveLobby() {
         val payload = JSONObject()
@@ -113,31 +131,6 @@ class MyStomp(val callbacks: Callbacks) {
                 }
             } catch (e: Exception) {
                 Log.e("MyStomp", "Leaving lobby failed", e)
-            }
-        }
-    }
-    fun joinLobby() {
-        val payload = JSONObject()
-        payload.put("playerKey", ClientState.playerId)
-
-        val json = JSONObject()
-        json.put("type", OutgoingLobbyMessageType.JOIN_LOBBY.toString())
-        json.put("payload", payload)
-
-        Log.d("STOMP", "JOIN -> session = $activeSession")
-
-        Log.d("MyStomp", "JOIN_LOBBY payload: $payload")
-        Log.d("MyStomp", "JOIN_LOBBY full message: $json")
-
-        scope.launch {
-            try {
-                if (::activeSession.isInitialized) {
-                    activeSession.sendText(LOBBY_DESTINATION, json.toString())
-                } else {
-                    callback("Error: Not connected")
-                }
-            } catch (e: Exception) {
-                Log.e("MyStomp", "Join lobby failed", e)
             }
         }
     }
@@ -203,4 +196,71 @@ class MyStomp(val callbacks: Callbacks) {
         }
     }
 
+    fun rollDice() {
+        sendGameMessage("ROLL_DICE") { payload ->
+            payload.put("playerId", ClientState.playerId)
+        }
+    }
+
+    fun move(position: String) {
+        sendGameMessage("MOVE") { payload ->
+            payload.put("playerId", ClientState.playerId)
+            payload.put("position", position)
+        }
+    }
+
+    fun enterRoom(roomId: String) {
+        sendGameMessage("ENTER_ROOM") { payload ->
+            payload.put("playerId", ClientState.playerId)
+            payload.put("roomId", roomId)
+        }
+    }
+
+    fun takeHiddenWay() {
+        sendGameMessage("TAKE_HIDDEN_WAY") { payload ->
+            payload.put("playerId", ClientState.playerId)
+        }
+    }
+
+
+    private fun sendGameMessage(type: String, buildPayload: (JSONObject) -> Unit) {
+        val payload = JSONObject()
+        buildPayload(payload)
+
+        val json = JSONObject()
+        json.put("type", type)
+        json.put("payload", payload)
+
+        Log.d("MyStomp", "Sending $type: $json")
+
+        scope.launch {
+            try {
+                if (::activeSession.isInitialized) {
+                    activeSession.sendText(GAME_DESTINATION, json.toString())
+                } else {
+                    callback("Error: Not connected")
+                }
+            } catch (e: Exception) {
+                Log.e("MyStomp", "$type failed", e)
+            }
+        }
+    }
+
+    fun makeSuggestion(suspect: String, room: String, weapon: String) {
+        sendGameMessage("MAKE_SUGGESTION") { payload ->
+            payload.put("suggesterID", ClientState.playerId)
+            payload.put("suspect", suspect)
+            payload.put("room", room)
+            payload.put("weapon", weapon)
+        }
+    }
+
+    fun makeAccusation(suspect: String, room: String, weapon: String) {
+        sendGameMessage("MAKE_ACCUSATION") { payload ->
+            payload.put("accuserID", ClientState.playerId)
+            payload.put("suspect", suspect)
+            payload.put("room", room)
+            payload.put("weapon", weapon)
+        }
+    }
 }
