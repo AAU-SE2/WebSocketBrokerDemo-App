@@ -100,16 +100,6 @@
             app:layout_constraintGuide_percent="0.75" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/gridOverlay"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:background="#44FF0000"
-            app:layout_constraintTop_toBottomOf="@id/guideGridTop"
-            app:layout_constraintBottom_toTopOf="@id/guideGridBottom"
-            app:layout_constraintStart_toEndOf="@id/guideGridStart"
-            app:layout_constraintEnd_toStartOf="@id/guideGridEnd" />
-
-        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/roomOverlay"
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -117,7 +107,20 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent" >
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/gridOverlay"
+                android:layout_width="245dp"
+                android:layout_height="155dp"
+                android:layout_marginStart="180dp"
+                android:layout_marginTop="91dp"
+                android:layout_marginEnd="179dp"
+                android:background="#44FF0000"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideBtnTop"
