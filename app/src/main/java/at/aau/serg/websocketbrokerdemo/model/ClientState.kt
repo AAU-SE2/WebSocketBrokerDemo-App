@@ -19,8 +19,10 @@ object ClientState {
     // Gamestate
     var currentPlayerId: String = ""
     var remainingMoves: Int = 0
-    var playerPositions: Map<String, String> = emptyMap() // playerId → Position
-    var currentPhase: String = ""
+    var playerPositions: MutableMap<String, String> = mutableMapOf()
+     var currentPhase: String = ""
     var currentPlayerIndex: Int = 0
 
+    var isEliminated: Boolean = false
+    var playerCharacterMap: MutableMap<String, String> = mutableMapOf()
 }
