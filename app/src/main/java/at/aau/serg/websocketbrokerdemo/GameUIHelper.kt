@@ -219,8 +219,8 @@ object GameUIHelper {
         val btnConfirm = Button(context)
         btnConfirm.text = context.getString(R.string.confirm)
         btnConfirm.setOnClickListener {
-            val s = selectedSuspect;
-            val w = selectedWeapon;
+            val s = selectedSuspect
+            val w = selectedWeapon
             val r = selectedRoom
             if (s != null && w != null && r != null) {
                 parent.removeView(overlay)
@@ -237,6 +237,100 @@ object GameUIHelper {
         content.addView(btnRow)
         scroll.addView(content)
         overlay.addView(scroll)
+        parent.addView(overlay)
+    }
+
+    fun showSuggestionTimer(context: Context, parent: ViewGroup, onDone: () -> Unit) {
+        val timerView = TextView(context)
+        timerView.setTextColor(Color.WHITE)
+        timerView.textSize = 20f
+        timerView.setBackgroundColor(Color.argb(180, 0, 0, 0))
+        timerView.gravity = Gravity.CENTER
+        timerView.setPadding(dpToPx(context, 16), dpToPx(context, 8), dpToPx(context, 16), dpToPx(context, 8))
+        val lp = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT).apply {
+            startToStart = ConstraintSet.PARENT_ID
+            endToEnd = ConstraintSet.PARENT_ID
+            topToTop = ConstraintSet.PARENT_ID
+            bottomToBottom = ConstraintSet.PARENT_ID
+        }
+        timerView.layoutParams = lp
+        parent.addView(timerView)
+
+        val handler = android.os.Handler(android.os.Looper.getMainLooper())
+        var seconds = 5
+        val runnable = object : Runnable {
+            override fun run() {
+                if (seconds > 0) {
+                    timerView.text = context.getString(R.string.checking_cards, seconds)
+                    seconds--
+                    handler.postDelayed(this, 1000)
+                } else {
+                    parent.removeView(timerView)
+                    onDone()
+                }
+            }
+        }
+        runnable.run()
+    }
+
+    fun showResultCards(context: Context, parent: ViewGroup, cardNames: List<String>, durationMs: Long = 4000) {
+        if (cardNames.isEmpty()) return
+        val overlay = ConstraintLayout(context)
+        overlay.setBackgroundColor(Color.argb(180, 0, 0, 0))
+        overlay.layoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
+
+        val row = LinearLayout(context)
+        row.orientation = LinearLayout.HORIZONTAL
+        row.gravity = Gravity.CENTER
+        val rlp = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT).apply {
+            startToStart = ConstraintSet.PARENT_ID
+            endToEnd = ConstraintSet.PARENT_ID
+            topToTop = ConstraintSet.PARENT_ID
+            bottomToBottom = ConstraintSet.PARENT_ID
+        }
+        row.layoutParams = rlp
+
+        for (name in cardNames) {
+            val card = CardRepository.cards.find { it.cardId == name }
+            val img = ImageView(context)
+            val ilp = LinearLayout.LayoutParams(dpToPx(context, 80), dpToPx(context, 120))
+            ilp.setMargins(dpToPx(context, 4), 0, dpToPx(context, 4), 0)
+            img.layoutParams = ilp
+            img.scaleType = ImageView.ScaleType.FIT_CENTER
+            img.setImageResource(card?.imageResId ?: android.R.drawable.ic_menu_help)
+            row.addView(img)
+        }
+        overlay.addView(row)
+        parent.addView(overlay)
+
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            parent.removeView(overlay)
+        }, durationMs)
+    }
+
+    fun showGameEndOverlay(context: Context, parent: ViewGroup, message: String) {
+        val overlay = ConstraintLayout(context)
+        overlay.setBackgroundColor(Color.argb(200, 0, 0, 0))
+        overlay.layoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
+        val tv = TextView(context)
+        tv.text = message
+        tv.setTextColor(Color.WHITE)
+        tv.textSize = 24f
+        tv.gravity = Gravity.CENTER
+        val tlp = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT).apply {
+            startToStart = ConstraintSet.PARENT_ID
+            endToEnd = ConstraintSet.PARENT_ID
+            topToTop = ConstraintSet.PARENT_ID
+            bottomToBottom = ConstraintSet.PARENT_ID
+        }
+        tv.layoutParams = tlp
+        overlay.addView(tv)
         parent.addView(overlay)
     }
 }
