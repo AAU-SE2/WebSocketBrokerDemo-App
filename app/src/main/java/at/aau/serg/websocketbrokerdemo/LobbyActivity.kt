@@ -55,6 +55,11 @@ class LobbyActivity : ComponentActivity() {
         )
 
         availableCharacters = ClientState.availableCharacters.toList()
+        isReady = false
+        btnPrev.visibility = View.VISIBLE
+        btnNext.visibility = View.VISIBLE
+        btnReady.isEnabled = true
+        findViewById<ImageView>(R.id.imgReadyCheck).visibility = View.GONE
 
         Log.d("LOBBY", "INIT characters = $availableCharacters")
 
@@ -217,6 +222,5 @@ class LobbyActivity : ComponentActivity() {
             )
             readyChecks[index].visibility = if (player.ready) View.VISIBLE else View.GONE
         }
-
     }
 }

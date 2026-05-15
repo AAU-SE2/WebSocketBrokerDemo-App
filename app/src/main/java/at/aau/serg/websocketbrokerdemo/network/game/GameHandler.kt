@@ -3,6 +3,7 @@ package at.aau.serg.websocketbrokerdemo.network.game
 import android.util.Log
 import at.aau.serg.websocketbrokerdemo.messaging.dtos.GameMessageType
 import at.aau.serg.websocketbrokerdemo.model.ClientState
+import at.aau.serg.websocketbrokerdemo.messaging.dtos.ExistingPlayerDTO
 import org.json.JSONObject
 
 class GameHandler {
@@ -114,6 +115,34 @@ class GameHandler {
 
                     GameMessageType.GAME_ABORTED.name -> {
                         val reason = payload?.optString("reason", "Game aborted") ?: "Game aborted"
+                        ClientState.currentPhase = payload?.optString("currentPhase", "") ?: ""
+                        ClientState.availableCharacters = payload
+                            ?.optJSONArray("availableCharacters")
+                            ?.let { array ->
+                                (0 until array.length()).map { array.getString(it) }
+                            } ?: emptyList()
+
+                        val playersArray = payload?.optJSONArray("existingPlayers")
+                        if (playersArray != null) {
+                            ClientState.players = (0 until playersArray.length()).map { i ->
+                                val p = playersArray.getJSONObject(i)
+                                ExistingPlayerDTO(
+                                    playerId = p.getString("playerId"),
+                                    ready = p.optBoolean("ready", false),
+                                    character = p.optString("characterType").takeIf { it.isNotEmpty() },
+                                    position = p.optString("position").takeIf { it.isNotEmpty() }
+                                )
+                            }
+                        }
+                        ClientState.myCards = emptyList()
+                        ClientState.seenCards.clear()
+                        ClientState.playerPositions.clear()
+                        ClientState.playerCharacterMap.clear()
+                        ClientState.remainingMoves = 0
+                        ClientState.currentPlayerIndex = 0
+                        ClientState.isEliminated = false
+                        ClientState.myCharacter = null
+
                         onGameAborted?.invoke(reason)
                     }
 
