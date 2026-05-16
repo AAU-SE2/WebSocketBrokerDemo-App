@@ -57,7 +57,7 @@ object GameUIHelper {
         val headerCount = 3
         val totalRows = allItems.size + headerCount + 1
         val rowH = containerH.toFloat() / (totalRows + 1)
-        val startY = rowH * 2.0f
+        val startY = rowH * 1.4f
         var idx = 0
         var currentY = startY
 

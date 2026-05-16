@@ -3,8 +3,6 @@ package at.aau.serg.websocketbrokerdemo.network.game
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-
-
 import android.util.Log
 import org.mockito.Mockito
 
@@ -18,7 +16,7 @@ class GameHandlerTest {
         GameHandler.onEnterRoom = null
         GameHandler.onHiddenWay = null
         GameHandler.onAccusation = null
-        GameHandler.onSuggestion = null
+        GameHandler.onSuggestionResult = null
     }
 
     private fun handle(block: () -> Unit) {
@@ -28,7 +26,9 @@ class GameHandlerTest {
     @Test
     fun `ROLL_DICE calls callback`() = handle {
         var result = 0
-        GameHandler.onRollDice = { result = it }
+        GameHandler.onRollDice = {
+            value, _ -> result = value
+        }
         GameHandler.handle("""{ "type": "ROLL_DICE", "payload": { "value": 5 } }""")
         Assertions.assertEquals(5, result)
     }
@@ -36,7 +36,9 @@ class GameHandlerTest {
     @Test
     fun `ROLL_DICE returns when payload missing`() = handle {
         var called = false
-        GameHandler.onRollDice = { called = true }
+        GameHandler.onRollDice = {
+            _, _ -> called = true
+        }
         GameHandler.handle("""{ "type": "ROLL_DICE" }""")
         Assertions.assertFalse(called)
     }
@@ -51,8 +53,10 @@ class GameHandlerTest {
     fun `MOVE calls callback`() = handle {
         var p = ""
         var pos = ""
-        GameHandler.onMove = { player, position -> p = player; pos = position }
-        GameHandler.handle("""{ "type": "MOVE", "payload": { "playerId": "p1", "position": "A1" } }""")
+        GameHandler.onMove = {
+            player, position, _ -> p = player; pos = position
+        }
+        GameHandler.handle("""{ "type": "MOVE", "payload": { "playerId": "p1", "position": "A1", "movesLeft": 2 } }""")
         Assertions.assertEquals("p1", p)
         Assertions.assertEquals("A1", pos)
     }
@@ -60,23 +64,24 @@ class GameHandlerTest {
     @Test
     fun `MOVE returns when playerId missing`() = handle {
         var called = false
-        GameHandler.onMove = { _, _ -> called = true }
+        GameHandler.onMove = {
+            _, _, _ -> called = true
+        }
         GameHandler.handle("""{ "type": "MOVE", "payload": { } }""")
         Assertions.assertFalse(called)
     }
 
     @Test
     fun `MOVE no callback set does not crash`() = handle {
-        GameHandler.handle("""{ "type": "MOVE", "payload": { "playerId": "p1", "position": "A1" } }""")
+        GameHandler.handle("""{ "type": "MOVE", "payload": { "playerId": "p1", "position": "A1", "movesLeft": 2 } }""")
         Assertions.assertTrue(true)
     }
 
     @Test
     fun `END_TURN calls callback`() = handle {
         var currentPlayerIndex = -1
-
-        GameHandler.onEndTurn = { index ->
-            currentPlayerIndex = index
+        GameHandler.onEndTurn = {
+            index -> currentPlayerIndex = index
         }
         GameHandler.handle("""{ "type": "END_TURN", "payload": { "currentPlayerIndex": 2 } }""")
         Assertions.assertEquals(2, currentPlayerIndex)
@@ -101,80 +106,94 @@ class GameHandlerTest {
     @Test
     fun `ENTER_ROOM calls callback`() = handle {
         var room = ""
-        GameHandler.onEnterRoom = { room = it }
-        GameHandler.handle("""{ "type": "ENTER_ROOM", "payload": { "roomId": "room1" } }""")
+        GameHandler.onEnterRoom = {
+            _, roomId -> room = roomId
+        }
+        GameHandler.handle("""{ "type": "ENTER_ROOM", "payload": { "playerId": "p1", "roomId": "room1" } }""")
         Assertions.assertEquals("room1", room)
     }
 
     @Test
     fun `ENTER_ROOM returns when missing`() = handle {
         var called = false
-        GameHandler.onEnterRoom = { called = true }
+        GameHandler.onEnterRoom = {
+            _, _ -> called = true
+        }
         GameHandler.handle("""{ "type": "ENTER_ROOM", "payload": { } }""")
         Assertions.assertFalse(called)
     }
 
     @Test
     fun `ENTER_ROOM no callback set does not crash`() = handle {
-        GameHandler.handle("""{ "type": "ENTER_ROOM", "payload": { "roomId": "room1" } }""")
+        GameHandler.handle("""{ "type": "ENTER_ROOM", "payload": { "playerId": "p1", "roomId": "room1" } }""")
         Assertions.assertTrue(true)
     }
 
     @Test
     fun `TAKE_HIDDEN_WAY calls callback`() = handle {
         var called = false
-        GameHandler.onHiddenWay = { called = true }
-        GameHandler.handle("""{ "type": "TAKE_HIDDEN_WAY" }""")
+        GameHandler.onHiddenWay = {
+            _, _ -> called = true
+        }
+        GameHandler.handle("""{ "type": "TAKE_HIDDEN_WAY", "payload": { "playerId": "p1", "targetRoom": "room1" } }""")
         Assertions.assertTrue(called)
     }
 
     @Test
     fun `TAKE_HIDDEN_WAY no callback set does not crash`() = handle {
-        GameHandler.handle("""{ "type": "TAKE_HIDDEN_WAY" }""")
+        GameHandler.handle("""{ "type": "TAKE_HIDDEN_WAY", "payload": { "playerId": "p1", "targetRoom": "room1" } }""")
         Assertions.assertTrue(true)
     }
 
     @Test
     fun `MAKE_ACCUSATION calls callback`() = handle {
-        var result = ""
-        GameHandler.onAccusation = { result = it }
-        GameHandler.handle("""{ "type": "MAKE_ACCUSATION", "payload": { "x": 1 } }""")
-        Assertions.assertTrue(result.contains("x"))
+        var called = false
+        GameHandler.onAccusation = {
+            _, _, _, _, _, _ -> called = true
+        }
+        GameHandler.handle("""{ "type": "MAKE_ACCUSATION", "payload": { "accuserID": "p1", "suspect": "s", "room": "r", "weapon": "w", "correct": true } }""")
+        Assertions.assertTrue(called)
     }
 
     @Test
     fun `MAKE_ACCUSATION returns when payload missing`() = handle {
         var called = false
-        GameHandler.onAccusation = { called = true }
+        GameHandler.onAccusation = {
+            _, _, _, _, _, _ -> called = true
+        }
         GameHandler.handle("""{ "type": "MAKE_ACCUSATION" }""")
         Assertions.assertFalse(called)
     }
 
     @Test
     fun `MAKE_ACCUSATION no callback set does not crash`() = handle {
-        GameHandler.handle("""{ "type": "MAKE_ACCUSATION", "payload": { "x": 1 } }""")
+        GameHandler.handle("""{ "type": "MAKE_ACCUSATION", "payload": { "accuserID": "p1", "suspect": "s", "room": "r", "weapon": "w", "correct": true } }""")
         Assertions.assertTrue(true)
     }
 
     @Test
-    fun `MAKE_SUGGESTION calls callback`() = handle {
-        var result = ""
-        GameHandler.onSuggestion = { result = it }
-        GameHandler.handle("""{ "type": "MAKE_SUGGESTION", "payload": { "y": 2 } }""")
-        Assertions.assertTrue(result.contains("y"))
+    fun `SUGGESTION_RESULT calls callback`() = handle {
+        var called = false
+        GameHandler.onSuggestionResult = {
+            _, _, _, _, _ -> called = true
+        }
+        GameHandler.handle("""{ "type": "SUGGESTION_RESULT", "payload": { "suggesterID": "p1", "suspect": "s", "room": "r", "weapon": "w", "matchingCards": [] } }""")
+        Assertions.assertTrue(called)
     }
 
     @Test
-    fun `MAKE_SUGGESTION returns when payload missing`() = handle {
+    fun `SUGGESTION_RESULT returns when payload missing`() = handle {
         var called = false
-        GameHandler.onSuggestion = { called = true }
-        GameHandler.handle("""{ "type": "MAKE_SUGGESTION" }""")
+        GameHandler.onSuggestionResult = {
+            _, _, _, _, _ -> called = true
+        }
+        GameHandler.handle("""{ "type": "SUGGESTION_RESULT" }""")
         Assertions.assertFalse(called)
     }
 
     @Test
-    fun `MAKE_SUGGESTION no callback set does not crash`() = handle {
-        GameHandler.handle("""{ "type": "MAKE_SUGGESTION", "payload": { "y": 2 } }""")
+    fun `SUGGESTION_RESULT no callback set does not crash`() = handle {
+        GameHandler.handle("""{ "type": "SUGGESTION_RESULT", "payload": { "suggesterID": "p1", "suspect": "s", "room": "r", "weapon": "w", "matchingCards": [] } }""")
         Assertions.assertTrue(true)
     }
 

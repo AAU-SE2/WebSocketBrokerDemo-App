@@ -6,57 +6,17 @@
     android:id="@+id/rootGameLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000">
+    android:background="@android:color/transparent">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/characterPanel"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginStart="8dp"
-        android:background="#77000000"
-        android:padding="4dp" />
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/checklistFrame"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintWidth_percent="0.15"
-        app:layout_constraintHeight_percent="0.8"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <ImageView
-            android:id="@+id/imgChecklist"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:scaleType="fitXY"
-            android:src="@drawable/cchecklist"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/checklistOverlay"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/boardContainer"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintDimensionRatio="2400:1080"
-        app:layout_constraintStart_toEndOf="@id/characterPanel"
-        app:layout_constraintEnd_toStartOf="@id/checklistFrame"
+        android:background="@android:color/transparent"
+        app:layout_constraintDimensionRatio="1920:1080"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
 
@@ -70,6 +30,28 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/characterPanel"
+            android:layout_width="80dp"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:padding="4dp" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/checklistOverlay"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintWidth_percent="0.22" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideGridTop"
@@ -154,20 +136,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.292" />
+            app:layout_constraintGuide_percent="0.31" />
+
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideBtn1End"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.416" />
+            app:layout_constraintGuide_percent="0.44" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideBtn2Start"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.417" />
+            app:layout_constraintGuide_percent="0.44" />
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideBtn2End"
             android:layout_width="wrap_content"
@@ -194,19 +177,20 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             app:layout_constraintGuide_percent="0.667" />
+
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideBtn4End"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.800" />
+            app:layout_constraintGuide_percent="0.75" />
 
         <Button
             android:id="@+id/btnRollDice"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:background="@android:color/transparent"
-            android:text="@string/btn_roll_dice"
+            android:text=""
             app:layout_constraintTop_toBottomOf="@id/guideBtnTop"
             app:layout_constraintBottom_toTopOf="@id/guideBtnBottom"
             app:layout_constraintStart_toEndOf="@id/guideBtn0Start"
@@ -217,7 +201,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:background="@android:color/transparent"
-            android:text="@string/btn_hidden_way"
+            android:text=""
             app:layout_constraintTop_toBottomOf="@id/guideBtnTop"
             app:layout_constraintBottom_toTopOf="@id/guideBtnBottom"
             app:layout_constraintStart_toEndOf="@id/guideBtn1Start"
@@ -228,7 +212,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:background="@android:color/transparent"
-            android:text="@string/btn_suggest"
+            android:text=""
             app:layout_constraintTop_toBottomOf="@id/guideBtnTop"
             app:layout_constraintBottom_toTopOf="@id/guideBtnBottom"
             app:layout_constraintStart_toEndOf="@id/guideBtn2Start"
@@ -239,7 +223,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:background="@android:color/transparent"
-            android:text="@string/btn_accuse"
+            android:text=""
             app:layout_constraintTop_toBottomOf="@id/guideBtnTop"
             app:layout_constraintBottom_toTopOf="@id/guideBtnBottom"
             app:layout_constraintStart_toEndOf="@id/guideBtn3Start"
@@ -250,7 +234,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:background="@android:color/transparent"
-            android:text="@string/btn_leave"
+            android:text=""
             app:layout_constraintTop_toBottomOf="@id/guideBtnTop"
             app:layout_constraintBottom_toTopOf="@id/guideBtnBottom"
             app:layout_constraintStart_toEndOf="@id/guideBtn4Start"

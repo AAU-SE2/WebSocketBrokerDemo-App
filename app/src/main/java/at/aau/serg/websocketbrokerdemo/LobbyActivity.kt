@@ -13,6 +13,7 @@ import at.aau.serg.websocketbrokerdemo.model.ClientState
 import at.aau.serg.websocketbrokerdemo.network.lobby.LobbyHandler
 import com.example.myapplication.R
 import java.util.UUID
+import at.aau.serg.websocketbrokerdemo.GameActivity
 class LobbyActivity : ComponentActivity() {
 
     private var availableCharacters: List<String> = emptyList()
@@ -176,6 +177,7 @@ class LobbyActivity : ComponentActivity() {
         findViewById<ImageButton>(R.id.btnNext).visibility = View.GONE
         findViewById<Button>(R.id.btnReady).isEnabled = false
         findViewById<ImageView>(R.id.imgReadyCheck).visibility = View.VISIBLE
+        findViewById<Button>(R.id.btnStartGame).alpha = 1f  // NEU
     }
     private fun updateMyCharacterImage(imgView: ImageView) {
 
@@ -217,6 +219,5 @@ class LobbyActivity : ComponentActivity() {
             )
             readyChecks[index].visibility = if (player.ready) View.VISIBLE else View.GONE
         }
-
     }
 }

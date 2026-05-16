@@ -24,5 +24,6 @@ object ClientState {
     var currentPlayerIndex: Int = 0
 
     var isEliminated: Boolean = false
+    var eliminatedPlayers: MutableSet<String> = mutableSetOf()
     var playerCharacterMap: MutableMap<String, String> = mutableMapOf()
 }
