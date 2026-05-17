@@ -3,6 +3,7 @@ package at.aau.serg.websocketbrokerdemo.model
 import at.aau.serg.websocketbrokerdemo.messaging.dtos.ExistingPlayerDTO
 
 object ClientState {
+    lateinit var gameStatus: String
     var availableCharacters: List<String> = emptyList()
 
     // Player
@@ -18,6 +19,7 @@ object ClientState {
 
     // Gamestate
     var currentPlayerId: String = ""
+
     var remainingMoves: Int = 0
     var playerPositions: MutableMap<String, String> = mutableMapOf()
      var currentPhase: String = ""

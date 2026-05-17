@@ -42,6 +42,16 @@ class MainActivity : ComponentActivity(), Callbacks {
             }
         }
 
+        LobbyHandler.onPlayerRejoined = { dto ->
+            runOnUiThread {
+                if (ClientState.gameStatus == "RUNNING") {
+                    startActivity(Intent(this, GameActivity::class.java))
+                } else {
+                    startActivity(Intent(this, LobbyActivity::class.java))
+                }
+            }
+        }
+        setContentView(R.layout.cluedo_fragment_fullscreen)
         LobbyHandler.onPlayerRejoinedRunning = {
             runOnUiThread {
                 loadingOverlay.visibility = android.view.View.GONE

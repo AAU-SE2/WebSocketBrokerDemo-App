@@ -15,7 +15,7 @@ import com.example.myapplication.R
 import at.aau.serg.websocketbrokerdemo.model.BoardConfig
 import at.aau.serg.websocketbrokerdemo.model.ClientState
 import at.aau.serg.websocketbrokerdemo.network.game.GameHandler
-
+import android.content.Intent
 class GameActivity : ComponentActivity() {
     private lateinit var rootLayout: ViewGroup
     private lateinit var boardImage: ImageView
@@ -430,6 +430,31 @@ class GameActivity : ComponentActivity() {
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
                 startActivity(intent)
                 finish()
+            }
+        }
+        GameHandler.onGamePaused = { disconnectedId, countdown ->
+            runOnUiThread {
+                Toast.makeText(this,
+                    "player disconnected! $countdown Sekunden zum Rejoin",
+                    Toast.LENGTH_LONG).show()
+            }
+        }
+
+        GameHandler.onContinueGame = { rejoinedId ->
+            runOnUiThread {
+                Toast.makeText(this,
+                    "player back! Game resumed.",
+                    Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        GameHandler.onGameAborted = { reason ->
+            runOnUiThread {
+                GameUIHelper.showGameEndOverlay(
+                    this,
+                    rootLayout,
+                    getString(R.string.game_over, reason)
+                )
             }
         }
     }

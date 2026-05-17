@@ -17,6 +17,8 @@ class GameHandler {
         var onSuggestionResult: ((String, String, String, String, List<String>) -> Unit)? = null
         var onGameFinished: ((String) -> Unit)? = null
         var onGameAborted: ((String) -> Unit)? = null
+        var onGamePaused: ((String, Int) -> Unit)? = null
+        var onContinueGame: ((String) -> Unit)? = null
         fun handle(msg: String) {
             try {
                 val json = JSONObject(msg)
@@ -130,9 +132,21 @@ class GameHandler {
                         val winner = if (payload != null) payload.optString("winner", "") else ""
                         onGameFinished?.invoke(winner)
                     }
+                    GameMessageType.GAME_PAUSED.name -> {
+                        val disconnectedId = payload?.optString("disconnectedPlayerId") ?: ""
+                        val countdown = payload?.optInt("countdown") ?: 30
+                        onGamePaused?.invoke(disconnectedId, countdown)
+                    }
+
+                    GameMessageType.CONTINUE_GAME.name -> {
+                        val rejoinedId = payload?.optString("rejoinedPlayerId") ?: ""
+                        onContinueGame?.invoke(rejoinedId)
+                    }
 
                     GameMessageType.GAME_ABORTED.name -> {
-                        val reason = if (payload != null) payload.optString("reason", "Game aborted") else "Game aborted"
+                        val reason = payload?.optString("reason", "Game aborted") ?: "Game aborted"
+                        ClientState.gameStatus = "LOBBY"
+
                         onGameAborted?.invoke(reason)
                     }
 

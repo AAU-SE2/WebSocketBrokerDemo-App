@@ -43,14 +43,18 @@ object LobbyHandler {
             }
             LobbyMessageType.PLAYER_REJOINED -> {
                 val dto = parsePlayerRejoined(payload)
+                ClientState.gameStatus = payload.optString("gameStatus", "LOBBY") // ← NEU
+
                 ClientState.players = dto.existingPlayers
                 if (dto.availableCharacters.isNotEmpty()) {
                     ClientState.availableCharacters = dto.availableCharacters
                 }
-
+/*
                 if (dto.playerId == ClientState.playerId) {
                     onLobbyJoined?.invoke()
                 }
+
+ */
 
                 onPlayerRejoined?.invoke(dto)
             }
@@ -204,12 +208,18 @@ object LobbyHandler {
     }
 
     private fun parsePlayers(payload: JSONObject): List<ExistingPlayerDTO> {
-        val array = payload.getJSONArray("existingPlayers")
+        //val array = payload.getJSONArray("existingPlayers")
+        val array = if (payload.has("existingPlayers"))
+            payload.getJSONArray("existingPlayers")
+        else
+            payload.getJSONArray("players")
         return (0 until array.length()).map {
             val p = array.getJSONObject(it)
             ExistingPlayerDTO(
                 playerId = p.getString("playerId"),
-                ready = p.getBoolean("ready"),
+                ready = p.optBoolean("ready", false),
+
+               // ready = p.getBoolean("ready"),
                 character = p.optString("characterType")
                     .ifEmpty { p.optString("character") }
                     .takeIf { it.isNotEmpty() },
