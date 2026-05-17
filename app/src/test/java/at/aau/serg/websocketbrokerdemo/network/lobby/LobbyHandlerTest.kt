@@ -20,6 +20,21 @@ class LobbyHandlerTest {
         ClientState.players = emptyList()
         ClientState.availableCharacters = emptyList()
         ClientState.playerId = ""
+        ClientState.myCards = emptyList()
+        ClientState.seenCards.clear()
+        ClientState.playerPositions.clear()
+        ClientState.playerCharacterMap.clear()
+        ClientState.eliminatedPlayers.clear()
+        ClientState.currentPhase = ""
+        ClientState.currentPlayerIndex = 0
+        ClientState.remainingMoves = 0
+        ClientState.myCharacter = null
+        ClientState.isEliminated = false
+        LobbyHandler.onOtherPlayerRemoved = null
+        LobbyHandler.onSetReady = null
+        LobbyHandler.onGameStarted = null
+        LobbyHandler.onStartGameError = null
+        LobbyHandler.onPlayerRejoinedRunning = null
     }
 
     private fun buildNewPlayerJoined(
@@ -92,6 +107,8 @@ class LobbyHandlerTest {
 
     @Test
     fun `NEW_PLAYER_JOINED calls onLobbyJoined`() {
+        ClientState.playerId = "p1"
+
         var called = false
         LobbyHandler.onLobbyJoined = { called = true }
 
@@ -142,6 +159,8 @@ class LobbyHandlerTest {
 
     @Test
     fun `PLAYER_REJOINED calls onLobbyJoined`() {
+        ClientState.playerId = "p1"
+
         var called = false
         LobbyHandler.onLobbyJoined = { called = true }
 
@@ -202,5 +221,180 @@ class LobbyHandlerTest {
         ClientState.playerId = "p1"
         LobbyHandler.handle(buildPlayerRemoved("p1"))
         Assertions.assertTrue(true)
+    }
+
+    @Test
+    fun `PLAYER_REMOVED calls other player callback`() {
+        ClientState.playerId = "p1"
+        var removedPlayer = ""
+
+        LobbyHandler.onOtherPlayerRemoved = { removedPlayer = it }
+
+        LobbyHandler.handle(buildPlayerRemoved("p2"))
+
+        Assertions.assertEquals("p2", removedPlayer)
+    }
+
+    @Test
+    fun `START_GAME_ERROR calls callback`() {
+        var error = ""
+
+        LobbyHandler.onStartGameError = { error = it }
+
+        val msg = """
+            {
+          "type": "START_GAME_ERROR",
+          "payload": {
+            "reason": "Not ready"
+          }
+        }
+    """.trimIndent()
+
+        LobbyHandler.handle(msg)
+
+        Assertions.assertEquals("Not ready", error)
+    }
+
+    @Test
+    fun `SET_READY updates ClientState`() {
+        val msg = """
+        {
+          "type": "SET_CHARACTER_TYPE_AND_STATUS_READY",
+          "payload": {
+            "playerId": "p1",
+            "characterType": "DR_RED",
+            "ready": true,
+            "availableCharacters": ["DR_BLUE"],
+            "existingPlayers": [
+              {
+                "playerId": "p1",
+                "ready": true,
+                "characterType": "DR_RED",
+                "position": ""
+              }
+            ]
+          }
+        }
+    """.trimIndent()
+
+        LobbyHandler.handle(msg)
+
+        Assertions.assertEquals(listOf("DR_BLUE"), ClientState.availableCharacters)
+        Assertions.assertEquals(1, ClientState.players.size)
+        Assertions.assertEquals("DR_RED", ClientState.players[0].character)
+        Assertions.assertTrue(ClientState.players[0].ready)
+    }
+
+    @Test
+    fun `GAME_STARTED updates state`() {
+        ClientState.playerId = "p1"
+
+        ClientState.players = listOf(
+            at.aau.serg.websocketbrokerdemo.messaging.dtos.ExistingPlayerDTO(
+                "p1",
+                true,
+                "DR_RED",
+                null
+            )
+        )
+
+        var started = false
+        LobbyHandler.onGameStarted = { started = true }
+
+        val msg = """
+    {
+      "type": "GAME_STARTED",
+      "payload": {
+        "currentPhase": "WAITING_FOR_ROLL",
+        "currentPlayerIndex": 0,
+        "players": [
+          {
+            "playerId": "p1",
+            "cards": [
+              { "name": "KNIFE" }
+            ]
+          }
+        ]
+      }
+    }
+    """.trimIndent()
+
+        LobbyHandler.handle(msg)
+
+        Assertions.assertTrue(started)
+        Assertions.assertEquals("WAITING_FOR_ROLL", ClientState.currentPhase)
+        Assertions.assertEquals(listOf("KNIFE"), ClientState.myCards)
+        Assertions.assertTrue(ClientState.seenCards.contains("KNIFE"))
+        Assertions.assertEquals("DR_RED", ClientState.playerCharacterMap["p1"])
+    }
+
+    @Test
+    fun `PLAYER_REJOINED_RUNNING updates state`() {
+        var called = false
+        LobbyHandler.onPlayerRejoinedRunning = { called = true }
+
+        val msg = """
+    {
+      "type": "PLAYER_REJOINED_RUNNING",
+      "payload": {
+        "playerId": "p1",
+        "myCharacter": "DR_RED",
+        "myCards": [
+          { "name": "KNIFE" }
+        ],
+        "isEliminated": true,
+        "players": [
+          {
+            "playerId": "p1",
+            "ready": true,
+            "characterType": "DR_RED",
+            "position": "1,1"
+          }
+        ],
+        "playerPositions": {
+          "p1": "1,1"
+        },
+        "playerCharacterMap": {
+          "p1": "DR_RED"
+        },
+        "eliminatedPlayers": ["p1"],
+        "currentPlayerId": "p1",
+        "currentPlayerIndex": 0,
+        "currentPhase": "IN_ROOM",
+        "remainingMoves": 2
+      }
+    }
+    """.trimIndent()
+
+        LobbyHandler.handle(msg)
+
+        Assertions.assertTrue(called)
+        Assertions.assertEquals("p1", ClientState.playerId)
+        Assertions.assertEquals("DR_RED", ClientState.myCharacter)
+        Assertions.assertEquals(listOf("KNIFE"), ClientState.myCards)
+        Assertions.assertTrue(ClientState.seenCards.contains("KNIFE"))
+        Assertions.assertEquals("1,1", ClientState.playerPositions["p1"])
+        Assertions.assertEquals("DR_RED", ClientState.playerCharacterMap["p1"])
+        Assertions.assertTrue(ClientState.eliminatedPlayers.contains("p1"))
+        Assertions.assertTrue(ClientState.isEliminated)
+    }
+
+    @Test
+    fun `PLAYER_REJOINED updates availableCharacters`() {
+
+        val msg = """
+    {
+      "type": "PLAYER_REJOINED",
+      "payload": {
+        "playerId": "p1",
+        "availableCharacters": ["DR_RED"],
+        "existingPlayers": []
+      }
+    }
+    """.trimIndent()
+
+        LobbyHandler.handle(msg)
+
+        Assertions.assertEquals(listOf("DR_RED"), ClientState.availableCharacters)
     }
 }
