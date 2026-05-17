@@ -181,5 +181,24 @@
         app:layout_constraintTop_toTopOf="@id/imgOtherPlayerCharacter4"
         app:layout_constraintEnd_toEndOf="@id/imgOtherPlayerCharacter4" />
 
+    <FrameLayout
+        android:id="@+id/loadingOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#88000000"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ProgressBar
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_gravity="center"
+            android:indeterminateTint="#D12E7D" />
+
+    </FrameLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
 
