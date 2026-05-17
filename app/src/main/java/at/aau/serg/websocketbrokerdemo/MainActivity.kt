@@ -42,6 +42,13 @@ class MainActivity : ComponentActivity(), Callbacks {
             }
         }
 
+        LobbyHandler.onPlayerRejoinedRunning = {
+            runOnUiThread {
+                loadingOverlay.visibility = android.view.View.GONE
+                startActivity(Intent(this, GameActivity::class.java))
+            }
+        }
+
         val btnLearn = findViewById<Button>(R.id.btnLearn)
 
         btnLearn.setOnClickListener {
