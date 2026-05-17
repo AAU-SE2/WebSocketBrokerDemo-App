@@ -11,6 +11,8 @@ enum class GameMessageType {
     SUGGESTION_RESULT,
     SUGGESTION_ERROR,
     GAME_FINISHED,
+    GAME_PAUSED,
+    CONTINUE_GAME,
     GAME_ABORTED
 
 
