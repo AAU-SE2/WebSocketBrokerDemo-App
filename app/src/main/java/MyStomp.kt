@@ -33,6 +33,7 @@ class MyStomp(val callbacks: Callbacks) {
 
     private lateinit var activeSession: StompSession
 
+    private var connected = false
     companion object {
         lateinit var instance: MyStomp
     }
@@ -51,17 +52,35 @@ class MyStomp(val callbacks: Callbacks) {
                 Log.d("STOMP", "CONNECTED -> session = $activeSession")
                 // connect to topic lobby-response
                 lobbyFlow = activeSession.subscribeText("/topic/lobby-response")
+               /*
                 lobbyCollector = scope.launch {
                     lobbyFlow?.collect { msg ->
                         // For Debugging
                         Log.d("MyStomp", "Received lobby-response: $msg")
                         LobbyHandler.handle(msg)
                     }
+
+
+                }
+                //
+                */
+                lobbyCollector = scope.launch {
+                    try {
+                        lobbyFlow?.collect { msg ->
+                            Log.d("MyStomp", "Received lobby-response: $msg")
+                            LobbyHandler.handle(msg)
+                        }
+                    } catch (e: Exception) {
+                        Log.e("MyStomp", "Lobby connection lost", e)
+                        // Nicht crashen! Einfach still beenden
+                    }
                 }
                 callback("connected")
 
                 // connect to topic game-response
                 gameFlow = activeSession.subscribeText("/topic/game-response")
+
+                /*
                 gameCollector = scope.launch {
                     gameFlow?.collect { msg ->
                         // For Debugging
@@ -70,6 +89,19 @@ class MyStomp(val callbacks: Callbacks) {
                     }
                 }
 
+
+                 */
+                gameCollector = scope.launch {
+                    try {
+                        gameFlow?.collect { msg ->
+                            Log.d("MyStomp", "Received game-response: $msg")
+                            GameHandler.handle(msg)
+                        }
+                    } catch (e: Exception) {
+                        Log.e("MyStomp", "Game connection lost", e)
+                        // Nicht crashen!
+                    }
+                }
                 callback("connected")
                 val payload = JSONObject()
                 payload.put("playerKey", ClientState.playerId)
