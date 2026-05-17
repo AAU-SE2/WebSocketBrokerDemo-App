@@ -42,6 +42,8 @@ object LobbyHandler {
             }
             LobbyMessageType.PLAYER_REJOINED -> {
                 val dto = parsePlayerRejoined(payload)
+                ClientState.gameStatus = payload.optString("gameStatus", "LOBBY") // ← NEU
+
                 ClientState.players = dto.existingPlayers
                 if (dto.availableCharacters.isNotEmpty()) {
                     ClientState.availableCharacters = dto.availableCharacters

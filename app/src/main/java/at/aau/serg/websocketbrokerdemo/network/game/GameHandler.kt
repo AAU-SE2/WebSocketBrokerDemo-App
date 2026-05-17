@@ -118,6 +118,8 @@ class GameHandler {
 
                     GameMessageType.GAME_ABORTED.name -> {
                         val reason = payload?.optString("reason", "Game aborted") ?: "Game aborted"
+                        ClientState.gameStatus = "LOBBY"
+
                         onGameAborted?.invoke(reason)
                     }
 
