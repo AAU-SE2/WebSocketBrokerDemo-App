@@ -5,6 +5,7 @@
         <item name="windowSplashScreenBackground">@android:color/white</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/clogo</item>
         <item name="postSplashScreenTheme">@style/Theme.MyApplication</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
     <style name="ThemeOverlay.MyApplication.FullscreenContainer" parent="">

@@ -80,6 +80,10 @@ class GameHandler {
                         val weapon = payload.getString("weapon")
                         val correct = payload.getBoolean("correct")
                         val eliminated = payload.optBoolean("eliminated", false)
+
+                        if (eliminated) {
+                            ClientState.eliminatedPlayers.add(accuserID)
+                        }
                         if (accuserID == ClientState.playerId && eliminated) {
                             ClientState.isEliminated = true
                         }

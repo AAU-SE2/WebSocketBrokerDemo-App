@@ -31,13 +31,16 @@ class MainActivity : ComponentActivity(), Callbacks {
 
         enableEdgeToEdge()
 
+        setContentView(R.layout.cluedo_fragment_fullscreen)
+
+        val loadingOverlay = findViewById<android.widget.FrameLayout>(R.id.loadingOverlay)
+
         LobbyHandler.onLobbyJoined = {
             runOnUiThread {
+                loadingOverlay.visibility = android.view.View.GONE
                 startActivity(Intent(this, LobbyActivity::class.java))
             }
         }
-
-        setContentView(R.layout.cluedo_fragment_fullscreen)
 
         val btnLearn = findViewById<Button>(R.id.btnLearn)
 
@@ -49,7 +52,9 @@ class MainActivity : ComponentActivity(), Callbacks {
 
         val btnStart = findViewById<Button>(R.id.btnStart)
         btnStart.setOnClickListener {
+            loadingOverlay.visibility = android.view.View.VISIBLE
             myStomp.connect()
+
             //TEST: ACHTUNG NUR ZUM TESTEN!!!!
             //startActivity(Intent(this, LobbyActivity::class.java))
         }

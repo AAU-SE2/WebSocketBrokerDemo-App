@@ -13,6 +13,7 @@ import at.aau.serg.websocketbrokerdemo.model.ClientState
 import at.aau.serg.websocketbrokerdemo.network.lobby.LobbyHandler
 import com.example.myapplication.R
 import java.util.UUID
+import at.aau.serg.websocketbrokerdemo.GameActivity
 class LobbyActivity : ComponentActivity() {
 
     private var availableCharacters: List<String> = emptyList()
@@ -23,6 +24,14 @@ class LobbyActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lobby)
+
+        val loadingOverlay = findViewById<android.widget.FrameLayout>(R.id.loadingOverlay)
+        loadingOverlay.visibility = android.view.View.VISIBLE
+
+        if (ClientState.players.isNotEmpty()) {
+            loadingOverlay.visibility = android.view.View.GONE
+        }
+
         LobbyHandler.onGameStarted = {
             runOnUiThread {
                 val intent = Intent(this, GameActivity::class.java)
@@ -120,6 +129,7 @@ class LobbyActivity : ComponentActivity() {
         }
         LobbyHandler.onNewPlayerJoined = { dto ->
             runOnUiThread {
+                loadingOverlay.visibility = android.view.View.GONE
                 ClientState.players = dto.existingPlayers
                 ClientState.availableCharacters = dto.availableCharacters
                 availableCharacters = dto.availableCharacters.ifEmpty {
@@ -181,6 +191,7 @@ class LobbyActivity : ComponentActivity() {
         findViewById<ImageButton>(R.id.btnNext).visibility = View.GONE
         findViewById<Button>(R.id.btnReady).isEnabled = false
         findViewById<ImageView>(R.id.imgReadyCheck).visibility = View.VISIBLE
+        findViewById<Button>(R.id.btnStartGame).alpha = 1f  // NEU
     }
     private fun updateMyCharacterImage(imgView: ImageView) {
 
