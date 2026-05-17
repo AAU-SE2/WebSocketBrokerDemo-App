@@ -24,6 +24,14 @@ class LobbyActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lobby)
+
+        val loadingOverlay = findViewById<android.widget.FrameLayout>(R.id.loadingOverlay)
+        loadingOverlay.visibility = android.view.View.VISIBLE
+
+        if (ClientState.players.isNotEmpty()) {
+            loadingOverlay.visibility = android.view.View.GONE
+        }
+
         LobbyHandler.onGameStarted = {
             runOnUiThread {
                 val intent = Intent(this, GameActivity::class.java)
@@ -56,6 +64,11 @@ class LobbyActivity : ComponentActivity() {
         )
 
         availableCharacters = ClientState.availableCharacters.toList()
+        isReady = false
+        btnPrev.visibility = View.VISIBLE
+        btnNext.visibility = View.VISIBLE
+        btnReady.isEnabled = true
+        findViewById<ImageView>(R.id.imgReadyCheck).visibility = View.GONE
 
         Log.d("LOBBY", "INIT characters = $availableCharacters")
 
@@ -116,6 +129,7 @@ class LobbyActivity : ComponentActivity() {
         }
         LobbyHandler.onNewPlayerJoined = { dto ->
             runOnUiThread {
+                loadingOverlay.visibility = android.view.View.GONE
                 ClientState.players = dto.existingPlayers
                 ClientState.availableCharacters = dto.availableCharacters
                 availableCharacters = dto.availableCharacters.ifEmpty {

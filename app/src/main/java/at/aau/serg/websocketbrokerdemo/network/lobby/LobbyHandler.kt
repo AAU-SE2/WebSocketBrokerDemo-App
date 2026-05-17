@@ -15,6 +15,7 @@ object LobbyHandler {
     var onOtherPlayerRemoved: ((String) -> Unit)? = null
     var onNewPlayerJoined: ((NewPlayerJoinedPayload) -> Unit)? = null
     var onPlayerRejoined: ((PlayerRejoinedPayload) -> Unit)? = null
+    var onPlayerRejoinedRunning: (() -> Unit)? = null
     var onGameFull: ((GameFullPayload) -> Unit)? = null
     var onLobbyJoined: (() -> Unit)? = null
     var onPlayerRemoved: ((String) -> Unit)? = null
@@ -57,6 +58,69 @@ object LobbyHandler {
 
                 onPlayerRejoined?.invoke(dto)
             }
+
+            LobbyMessageType.PLAYER_REJOINED_RUNNING -> {
+                ClientState.playerId = payload.optString("playerId", ClientState.playerId)
+
+                ClientState.myCharacter = payload.optString("myCharacter").takeIf { it.isNotEmpty() }
+
+                val myCardsArray = payload.optJSONArray("myCards")
+                if (myCardsArray != null) {
+                    val cardIds = mutableListOf<String>()
+                    for (i in 0 until myCardsArray.length()) {
+                        val cardObj = myCardsArray.getJSONObject(i)
+                        cardIds.add(cardObj.getString("name"))
+                    }
+                    ClientState.myCards = cardIds
+                    ClientState.seenCards.addAll(cardIds)
+                }
+
+                ClientState.isEliminated = payload.optBoolean("isEliminated", false)
+
+                val playersArray = payload.optJSONArray("players")
+                if (playersArray != null) {
+                    val playerList = mutableListOf<ExistingPlayerDTO>()
+                    for (i in 0 until playersArray.length()) {
+                        val p = playersArray.getJSONObject(i)
+                        playerList.add(ExistingPlayerDTO(
+                            playerId = p.getString("playerId"),
+                            ready = p.getBoolean("ready"),
+                            character = p.optString("characterType").takeIf { it.isNotEmpty() },
+                            position = p.optString("position").takeIf { it.isNotEmpty() }
+                        ))
+                    }
+                    ClientState.players = playerList
+                }
+
+                val positions = payload.optJSONObject("playerPositions")
+                if (positions != null) {
+                    for (key in positions.keys()) {
+                        ClientState.playerPositions[key] = positions.getString(key)
+                    }
+                }
+
+                val charMap = payload.optJSONObject("playerCharacterMap")
+                if (charMap != null) {
+                    for (key in charMap.keys()) {
+                        ClientState.playerCharacterMap[key] = charMap.getString(key)
+                    }
+                }
+
+                val eliminated = payload.optJSONArray("eliminatedPlayers")
+                if (eliminated != null) {
+                    for (i in 0 until eliminated.length()) {
+                        ClientState.eliminatedPlayers.add(eliminated.getString(i))
+                    }
+                }
+
+                ClientState.currentPlayerId = payload.optString("currentPlayerId", "")
+                ClientState.currentPlayerIndex = payload.optInt("currentPlayerIndex", 0)
+                ClientState.currentPhase = payload.optString("currentPhase", "")
+                ClientState.remainingMoves = payload.optInt("remainingMoves", 0)
+
+                onPlayerRejoinedRunning?.invoke()
+            }
+
             LobbyMessageType.GAME_FULL -> {
                 onGameFull?.invoke(parseLobbyError(payload))
             }

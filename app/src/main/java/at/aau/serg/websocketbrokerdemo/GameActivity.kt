@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
+import android.content.Intent
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import com.example.myapplication.R
@@ -424,11 +425,11 @@ class GameActivity : ComponentActivity() {
 
         GameHandler.onGameAborted = { reason ->
             runOnUiThread {
-                GameUIHelper.showGameEndOverlay(
-                    this,
-                    rootLayout,
-                    getString(R.string.game_over, reason)
-                )
+                Toast.makeText(this, reason, Toast.LENGTH_LONG).show()
+                val intent = Intent(this, LobbyActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(intent)
+                finish()
             }
         }
         GameHandler.onGamePaused = { disconnectedId, countdown ->
