@@ -40,12 +40,6 @@ object BoardConfig {
         "DR_BLUE" to Pair(7, 5)
     )
 
-    val CHARACTER_COLORS: Map<String, Int> = mapOf(
-        "MRS_LAVENDER" to "#9B59B6".toColorInt(), // purple
-        "MRS_PINK" to "#E91E63".toColorInt(),      // pink
-        "DR_RED" to "#E74C3C".toColorInt(),         // red
-        "DR_BLUE" to "#3498DB".toColorInt()         // blue
-    )
 
     val ALL_CHARACTERS = listOf("DR_RED", "DR_BLUE", "MRS_PINK", "MRS_LAVENDER")
 
