@@ -11,6 +11,7 @@ import android.widget.Toast
 import android.content.Intent
 import android.widget.TextView
 import androidx.activity.ComponentActivity
+import androidx.activity.addCallback
 import at.aau.serg.websocketbrokerdemo.model.BoardColors
 import com.example.myapplication.R
 import at.aau.serg.websocketbrokerdemo.model.BoardConfig
@@ -40,6 +41,9 @@ class GameActivity : ComponentActivity() {
     private lateinit var btnLeave: Button
 
     private val playerStatusViews = mutableMapOf<String, TextView>()
+    private var pauseOverlay: View? = null
+    private var countdownHandler: android.os.Handler? = null
+    private var countdownRunnable: Runnable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,11 +73,26 @@ class GameActivity : ComponentActivity() {
         findViewById<Button>(R.id.btnAccuse).setOnClickListener { onAccuse() }
         findViewById<Button>(R.id.btnLeave).setOnClickListener { onLeaveGame() }
 
-        boardImage.post {
-            if (!boardSetupDone) {
-                boardSetupDone = true
-                setupBoard()
+        // Wait for gridOverlay to have real dimensions before setting up the board
+        gridOverlay.viewTreeObserver.addOnGlobalLayoutListener(object :
+            android.view.ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                if (gridOverlay.width > 0 && gridOverlay.height > 0) {
+                    // Remove listener immediately so setupBoard() is called exactly once
+                    gridOverlay.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    if (!boardSetupDone) {
+                        boardSetupDone = true
+                        setupBoard()
+                        // Re-apply positions that may have arrived before layout was ready
+                        placeAllPlayerDots()
+                    }
+                }
             }
+        })
+
+        onBackPressedDispatcher.addCallback(this) {
+            onLeaveGame()
+            finish()
         }
     }
 
@@ -126,22 +145,17 @@ class GameActivity : ComponentActivity() {
         characterPanel.setBackgroundColor(Color.argb(120, 0, 0, 0))
         characterPanel.visibility = View.VISIBLE
 
-        val myId = ClientState.playerId
-        val sortedPlayers = ClientState.players.sortedWith(compareBy {
-            if (it.playerId == myId) 0 else 1
-        })
-
-        for (player in sortedPlayers) {
+        for (player in ClientState.players) {
             val charType = player.character ?: continue
 
             val itemView =
                 layoutInflater.inflate(R.layout.player_panel_entry, characterPanel, false)
 
-            val imageResId = when (charType) {
-                "drred" -> R.drawable.cdrred
-                "drblue" -> R.drawable.cdrblue
-                "mrspink" -> R.drawable.cmrspink
-                "mrslavender" -> R.drawable.cmrslavender
+            val imageResId = when (charType.uppercase().replace(" ", "_")) {
+                "DR_RED" -> R.drawable.cdrred
+                "DR_BLUE" -> R.drawable.cdrblue
+                "MRS_PINK" -> R.drawable.cmrspink
+                "MRS_LAVENDER" -> R.drawable.cmrslavender
                 else -> android.R.drawable.ic_menu_help
             }
             itemView.findViewById<ImageView>(R.id.imgCharacter).setImageResource(imageResId)
@@ -260,8 +274,13 @@ class GameActivity : ComponentActivity() {
     }
 
     private fun onLeaveGame() {
-        MyStomp.instance.leaveLobby()
+        // Only disconnect — the server's SessionDisconnectEvent will start the 30-second
+        // pause/rejoin timer. Calling leaveLobby() before disconnect would race with
+        // the session closing and could bypass the rejoin logic entirely.
         MyStomp.instance.disconnect()
+        val intent = Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(intent)
         finish()
     }
 
@@ -300,7 +319,13 @@ class GameActivity : ComponentActivity() {
                                 .setPositiveButton("Yes") { _, _ ->
                                     MyStomp.instance.enterRoom(room)
                                 }
-                                .setNegativeButton("No") { _, _ -> }
+                                .setNegativeButton("No") { _, _ ->
+                                    // Player chose not to enter — end turn if no moves left
+                                    if (movesLeft == 0) {
+                                        MyStomp.instance.endTurn()
+                                    }
+                                }
+                                .setCancelable(false)
                                 .show()
                         }
                     }
@@ -424,40 +449,61 @@ class GameActivity : ComponentActivity() {
             }
         }
 
-        GameHandler.onGameAborted = { reason ->
-            runOnUiThread {
-                Toast.makeText(this, reason, Toast.LENGTH_LONG).show()
-                val intent = Intent(this, LobbyActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-                startActivity(intent)
-                finish()
-            }
-        }
         GameHandler.onGamePaused = { disconnectedId, countdown ->
             runOnUiThread {
-                Toast.makeText(this,
-                    "player disconnected! $countdown Sekunden zum Rejoin",
-                    Toast.LENGTH_LONG).show()
+                showPauseOverlay(disconnectedId, countdown)
             }
         }
 
         GameHandler.onContinueGame = { rejoinedId ->
             runOnUiThread {
+                dismissPauseOverlay()
                 Toast.makeText(this,
-                    "player back! Game resumed.",
+                    "Player rejoined! Game resumed.",
                     Toast.LENGTH_SHORT).show()
             }
         }
 
         GameHandler.onGameAborted = { reason ->
             runOnUiThread {
-                GameUIHelper.showGameEndOverlay(
-                    this,
-                    rootLayout,
-                    getString(R.string.game_over, reason)
-                )
+                GameUIHelper.showGameEndOverlay(this, rootLayout, getString(R.string.game_over, reason))
+                android.os.Handler(mainLooper).postDelayed({
+                    val intent = Intent(this, LobbyActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                    startActivity(intent)
+                    finish()
+                }, 3000)
             }
         }
+
+        GameHandler.onGameError = { reason ->
+            runOnUiThread {
+                Toast.makeText(this, reason, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+/*
+    @Suppress("DEPRECATION")
+    override fun onBackPressed() {
+        super.onBackPressed()
+        onLeaveGame()
+    }*/
+
+    override fun onDestroy() {
+        dismissPauseOverlay()
+        GameHandler.onRollDice = null
+        GameHandler.onMove = null
+        GameHandler.onEndTurn = null
+        GameHandler.onEnterRoom = null
+        GameHandler.onHiddenWay = null
+        GameHandler.onAccusation = null
+        GameHandler.onSuggestionResult = null
+        GameHandler.onGameFinished = null
+        GameHandler.onGameAborted = null
+        GameHandler.onGamePaused = null
+        GameHandler.onContinueGame = null
+        GameHandler.onGameError = null
+        super.onDestroy()
     }
 
     private fun updatePlayerDot(playerId: String, position: String) {
@@ -574,6 +620,52 @@ class GameActivity : ComponentActivity() {
     private fun setButtonActive(btn: Button, active: Boolean) {
         btn.alpha = if (active) 1.0f else 0.4f
         btn.isClickable = active
+    }
+
+    private fun showPauseOverlay(disconnectedId: String, countdown: Int) {
+        dismissPauseOverlay()
+
+        val overlay = android.widget.FrameLayout(this).apply {
+            setBackgroundColor(Color.argb(180, 0, 0, 0))
+            isClickable = true // block touches to game underneath
+        }
+        val textView = TextView(this).apply {
+            setTextColor(Color.WHITE)
+            textSize = 20f
+            gravity = android.view.Gravity.CENTER
+        }
+        overlay.addView(textView, android.widget.FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
+            android.view.Gravity.CENTER
+        ))
+        rootLayout.addView(overlay, ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
+        ))
+        pauseOverlay = overlay
+
+        var remaining = countdown
+        val handler = android.os.Handler(mainLooper)
+        val runnable = object : Runnable {
+            override fun run() {
+                if (remaining > 0) {
+                    textView.text = getString(R.string.player_disconnected_countdown,
+                        disconnectedId.take(8), remaining)
+                    remaining--
+                    handler.postDelayed(this, 1000)
+                }
+            }
+        }
+        countdownHandler = handler
+        countdownRunnable = runnable
+        runnable.run()
+    }
+
+    private fun dismissPauseOverlay() {
+        countdownRunnable?.let { countdownHandler?.removeCallbacks(it) }
+        countdownRunnable = null
+        countdownHandler = null
+        pauseOverlay?.let { rootLayout.removeView(it) }
+        pauseOverlay = null
     }
 
     private fun updateAllPlayerStatuses() {
