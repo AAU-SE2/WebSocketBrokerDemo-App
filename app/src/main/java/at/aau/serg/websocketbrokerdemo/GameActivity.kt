@@ -11,11 +11,12 @@ import android.widget.Toast
 import android.content.Intent
 import android.widget.TextView
 import androidx.activity.ComponentActivity
+import at.aau.serg.websocketbrokerdemo.model.BoardColors
 import com.example.myapplication.R
 import at.aau.serg.websocketbrokerdemo.model.BoardConfig
 import at.aau.serg.websocketbrokerdemo.model.ClientState
 import at.aau.serg.websocketbrokerdemo.network.game.GameHandler
-import android.content.Intent
+
 class GameActivity : ComponentActivity() {
     private lateinit var rootLayout: ViewGroup
     private lateinit var boardImage: ImageView
@@ -475,7 +476,7 @@ class GameActivity : ComponentActivity() {
 
         val charType = ClientState.playerCharacterMap[playerId]
             ?: ClientState.players.find { it.playerId == playerId }?.character
-        val color = BoardConfig.CHARACTER_COLORS[charType] ?: Color.GRAY
+        val color = BoardColors.CHARACTER_COLORS[charType] ?: Color.GRAY
         val dot = GameUIHelper.createPlayerDot(this, color)
         val dotSize = GameUIHelper.dpToPx(this, 16)
 
