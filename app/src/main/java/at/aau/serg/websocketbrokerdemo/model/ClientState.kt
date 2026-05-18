@@ -3,7 +3,7 @@ package at.aau.serg.websocketbrokerdemo.model
 import at.aau.serg.websocketbrokerdemo.messaging.dtos.ExistingPlayerDTO
 
 object ClientState {
-    lateinit var gameStatus: String
+    var gameStatus: String = "LOBBY"
     var availableCharacters: List<String> = emptyList()
 
     // Player
