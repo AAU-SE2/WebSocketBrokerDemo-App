@@ -162,7 +162,7 @@ class LobbyHandlerTest {
         ClientState.playerId = "p1"
 
         var called = false
-        LobbyHandler.onLobbyJoined = { called = true }
+        LobbyHandler.onPlayerRejoined = { called = true }
 
         LobbyHandler.handle(buildPlayerRejoined())
 
