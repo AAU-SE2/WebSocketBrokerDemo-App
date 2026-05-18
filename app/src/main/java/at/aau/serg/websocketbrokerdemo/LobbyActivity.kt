@@ -7,6 +7,7 @@ import android.util.Log
 import android.widget.*
 import android.view.View
 import androidx.activity.ComponentActivity
+import androidx.activity.addCallback
 import at.aau.serg.websocketbrokerdemo.messaging.dtos.ExistingPlayerDTO
 import at.aau.serg.websocketbrokerdemo.model.CardRepository
 import at.aau.serg.websocketbrokerdemo.model.ClientState
@@ -198,19 +199,19 @@ class LobbyActivity : ComponentActivity() {
                     .show()
             }
         }
+
+        onBackPressedDispatcher.addCallback(this) {
+            if (isLeaving) return@addCallback
+            isLeaving = true
+            MyStomp.instance.leaveLobby()
+            MyStomp.instance.disconnect()
+            val intent = Intent(this@LobbyActivity, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(intent)
+            finish()
+        }
     }
-    @Suppress("DEPRECATION")
-    override fun onBackPressed() {
-        super.onBackPressed()
-        if (isLeaving) return
-        isLeaving = true
-        MyStomp.instance.leaveLobby()
-        MyStomp.instance.disconnect()
-        val intent = Intent(this, MainActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-        startActivity(intent)
-        finish()
-    }
+
 
     override fun onDestroy() {
         LobbyHandler.onLobbyJoined = null
