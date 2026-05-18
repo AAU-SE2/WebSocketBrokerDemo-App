@@ -120,9 +120,10 @@ sonar {
             "**/Callbacks.kt," +
             "**/UserPreferences.kt," +
             "**/MyStomp.kt," +
-            "**/LearnActivity.kt" +
-            "**/GameUIHelper.kt" +
-            "**/BoardColors.kt"
+            "**/LearnActivity.kt," +
+            "**/GameUIHelper.kt," +
+            "**/BoardColors.kt," +
+            "**/res/drawable/**,**/res/mipmap-*/**,**/res/font/**"
 
         )
     }

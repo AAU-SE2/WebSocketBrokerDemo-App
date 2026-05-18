@@ -201,6 +201,7 @@ class LobbyActivity : ComponentActivity() {
     }
     @Suppress("DEPRECATION")
     override fun onBackPressed() {
+        super.onBackPressed()
         if (isLeaving) return
         isLeaving = true
         MyStomp.instance.leaveLobby()
