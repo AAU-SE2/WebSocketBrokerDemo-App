@@ -2,7 +2,6 @@ package at.aau.serg.websocketbrokerdemo
 
 import MyStomp
 import android.os.Bundle
-import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 import com.example.myapplication.R
@@ -12,20 +11,17 @@ import android.util.Log
 import at.aau.serg.websocketbrokerdemo.model.ClientState
 import at.aau.serg.websocketbrokerdemo.network.lobby.LobbyHandler
 class MainActivity : ComponentActivity(), Callbacks {
-    lateinit var myStomp: MyStomp
-    lateinit var response: TextView
+    private lateinit var myStomp: MyStomp
 
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // myStomp = MyStomp(this) // hier wird es bei jedem oncreat neu erstellet so
-        if (!::myStomp.isInitialized) {  //  nur einmal erstellen
-            myStomp = MyStomp(this)
-        }
-       // super.onCreate(savedInstanceState)
-        // ID wird hier einmalig erstellt und gespeichert
+        // Always create a fresh MyStomp — it resets internal state cleanly
+        // and keeps the CoroutineScope alive for reconnection.
+        myStomp = MyStomp(this)
+
         val playerId = UserPreferences.getOrCreatePlayerId(this)
         ClientState.playerId = playerId
 
@@ -51,7 +47,6 @@ class MainActivity : ComponentActivity(), Callbacks {
                 }
             }
         }
-        setContentView(R.layout.cluedo_fragment_fullscreen)
         LobbyHandler.onPlayerRejoinedRunning = {
             runOnUiThread {
                 loadingOverlay.visibility = android.view.View.GONE
@@ -71,36 +66,25 @@ class MainActivity : ComponentActivity(), Callbacks {
         btnStart.setOnClickListener {
             loadingOverlay.visibility = android.view.View.VISIBLE
             myStomp.connect()
-
-            //TEST: ACHTUNG NUR ZUM TESTEN!!!!
-            //startActivity(Intent(this, LobbyActivity::class.java))
         }
 
-        
-        /*findViewById<Button>(R.id.connectbtn).setOnClickListener { myStomp.connect() }
-        findViewById<Button>(R.id.hellobtn).setOnClickListener { myStomp.sendHello() }
-        findViewById<Button>(R.id.jsonbtn).setOnClickListener { myStomp.sendJson() }
-        findViewById<Button>(R.id.joinlobbybtn).setOnClickListener {
-            myStomp.joinLobby("Test", "Test")
+    }
+
+    override fun onDestroy() {
+        LobbyHandler.onLobbyJoined = null
+        LobbyHandler.onPlayerRejoined = null
+        LobbyHandler.onPlayerRejoinedRunning = null
+        if (::myStomp.isInitialized) {
+            myStomp.disconnect()
         }
-        response = findViewById(R.id.response_view)
-    */}
+        super.onDestroy()
+    }
 
     override fun onResponse(res: String) {
-        // response.text = res
         Log.d("MainActivity", "Response: $res")
     }
 
     override fun onConnected() {
-        val intent = Intent(this, LobbyActivity::class.java)
-        startActivity(intent)
-    }
-
-    fun onJoinSuccess(message: String) {
-        response.text = message
-    }
-
-    fun onPlayersReceived(players: List<String>) {
-        response.text = players.joinToString(", ")
+        // Handled via LobbyHandler.onLobbyJoined callback
     }
 }

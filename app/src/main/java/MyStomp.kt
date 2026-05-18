@@ -18,7 +18,7 @@ import org.hildan.krossbow.stomp.subscribeText
 import org.hildan.krossbow.websocket.okhttp.OkHttpWebSocketClient
 import org.json.JSONObject
 
-private const val WEBSOCKET_URI = "ws://10.0.2.2:8080/websocket-example-broker"
+private const val WEBSOCKET_URI = "ws://se2-demo.aau.at:53211/websocket-example-broker"
 private const val LOBBY_DESTINATION = "/app/lobby"
 private const val GAME_DESTINATION = "/app/game"
 class MyStomp(val callbacks: Callbacks) {
@@ -44,7 +44,15 @@ class MyStomp(val callbacks: Callbacks) {
 
     fun connect() {
         Log.d("STOMP", "CONNECT called")
-        client = StompClient(OkHttpWebSocketClient()) // other config can be passed in here
+        // Cancel any previous collectors before starting a fresh connection
+        lobbyCollector?.cancel()
+        lobbyCollector = null
+        gameCollector?.cancel()
+        gameCollector = null
+        lobbyFlow = null
+        gameFlow = null
+
+        client = StompClient(OkHttpWebSocketClient())
         scope.launch {
             try {
                 activeSession = client.connect(WEBSOCKET_URI)
@@ -52,18 +60,6 @@ class MyStomp(val callbacks: Callbacks) {
                 Log.d("STOMP", "CONNECTED -> session = $activeSession")
                 // connect to topic lobby-response
                 lobbyFlow = activeSession.subscribeText("/topic/lobby-response")
-               /*
-                lobbyCollector = scope.launch {
-                    lobbyFlow?.collect { msg ->
-                        // For Debugging
-                        Log.d("MyStomp", "Received lobby-response: $msg")
-                        LobbyHandler.handle(msg)
-                    }
-
-
-                }
-                //
-                */
                 lobbyCollector = scope.launch {
                     try {
                         lobbyFlow?.collect { msg ->
@@ -72,25 +68,10 @@ class MyStomp(val callbacks: Callbacks) {
                         }
                     } catch (e: Exception) {
                         Log.e("MyStomp", "Lobby connection lost", e)
-                        // Nicht crashen! Einfach still beenden
                     }
                 }
-                callback("connected")
 
-                // connect to topic game-response
                 gameFlow = activeSession.subscribeText("/topic/game-response")
-
-                /*
-                gameCollector = scope.launch {
-                    gameFlow?.collect { msg ->
-                        // For Debugging
-                        Log.d("MyStomp", "Received game-response: $msg")
-                        GameHandler.handle(msg)
-                    }
-                }
-
-
-                 */
                 gameCollector = scope.launch {
                     try {
                         gameFlow?.collect { msg ->
@@ -99,7 +80,6 @@ class MyStomp(val callbacks: Callbacks) {
                         }
                     } catch (e: Exception) {
                         Log.e("MyStomp", "Game connection lost", e)
-                        // Nicht crashen!
                     }
                 }
                 callback("connected")
@@ -128,15 +108,22 @@ class MyStomp(val callbacks: Callbacks) {
     }
 
     fun disconnect() {
+        // Cancel collectors, but do NOT cancel the scope itself — we need it for reconnection.
+        lobbyCollector?.cancel()
+        lobbyCollector = null
+        gameCollector?.cancel()
+        gameCollector = null
+        lobbyFlow = null
+        gameFlow = null
+        // Close the STOMP session asynchronously
         scope.launch {
             try {
-                lobbyCollector?.cancel()
-                lobbyCollector = null
-                gameCollector?.cancel()
-                gameCollector = null
                 if (::activeSession.isInitialized) {
-                    activeSession.disconnect()
+                    try {
+                        activeSession.disconnect()
+                    } catch (_: Exception) { }
                 }
+                connected = false
                 Log.d("MyStomp", "Disconnected successfully")
             } catch (e: Exception) {
                 Log.e("MyStomp", "Disconnect failed", e)
@@ -295,4 +282,5 @@ class MyStomp(val callbacks: Callbacks) {
             payload.put("weapon", weapon)
         }
     }
+
 }

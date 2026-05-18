@@ -162,7 +162,7 @@ class LobbyHandlerTest {
         ClientState.playerId = "p1"
 
         var called = false
-        LobbyHandler.onLobbyJoined = { called = true }
+        LobbyHandler.onPlayerRejoined = { called = true }
 
         LobbyHandler.handle(buildPlayerRejoined())
 
@@ -332,7 +332,7 @@ class LobbyHandlerTest {
     fun `PLAYER_REJOINED_RUNNING updates state`() {
         var called = false
         LobbyHandler.onPlayerRejoinedRunning = { called = true }
-
+        ClientState.playerId = "p1"
         val msg = """
     {
       "type": "PLAYER_REJOINED_RUNNING",
@@ -396,5 +396,132 @@ class LobbyHandlerTest {
         LobbyHandler.handle(msg)
 
         Assertions.assertEquals(listOf("DR_RED"), ClientState.availableCharacters)
+    }
+    @Test
+    fun `LEAVE_ERROR calls onError`() {
+        var error = ""
+
+        LobbyHandler.onError = { error = it }
+
+        LobbyHandler.handle("""
+        {
+          "type": "LEAVE_ERROR",
+          "payload": {
+            "reason": "Could not leave"
+          }
+        }
+    """.trimIndent())
+
+        Assertions.assertEquals("Could not leave", error)
+    }
+
+    @Test
+    fun `SET_READY_ERROR calls onError`() {
+        var error = ""
+
+        LobbyHandler.onError = { error = it }
+
+        LobbyHandler.handle("""
+        {
+          "type": "SET_READY_ERROR",
+          "payload": {
+            "reason": "Could not set ready"
+          }
+        }
+    """.trimIndent())
+
+        Assertions.assertEquals("Could not set ready", error)
+    }
+    @Test
+    fun `PLAYER_REJOINED_RUNNING ignores message for other player`() {
+        ClientState.playerId = "me"
+
+        var called = false
+        LobbyHandler.onPlayerRejoinedRunning = { called = true }
+
+        LobbyHandler.handle("""
+        {
+          "type": "PLAYER_REJOINED_RUNNING",
+          "payload": {
+            "playerId": "other"
+          }
+        }
+    """.trimIndent())
+
+        Assertions.assertFalse(called)
+    }
+    @Test
+    fun `GAME_STARTED without cards does not crash`() {
+        ClientState.playerId = "p1"
+        ClientState.players = listOf(
+            at.aau.serg.websocketbrokerdemo.messaging.dtos.ExistingPlayerDTO(
+                "p1",
+                true,
+                "DR_RED",
+                null
+            )
+        )
+
+        LobbyHandler.handle("""
+        {
+          "type": "GAME_STARTED",
+          "payload": {
+            "currentPhase": "WAITING_FOR_ROLL",
+            "currentPlayerIndex": 0,
+            "players": [
+              { "playerId": "p1" }
+            ]
+          }
+        }
+    """.trimIndent())
+
+        Assertions.assertTrue(ClientState.myCards.isEmpty())
+    }
+    @Test
+    fun `PLAYER_REJOINED_RUNNING works with missing optional arrays`() {
+        ClientState.playerId = "p1"
+
+        var called = false
+        LobbyHandler.onPlayerRejoinedRunning = { called = true }
+
+        LobbyHandler.handle("""
+        {
+          "type": "PLAYER_REJOINED_RUNNING",
+          "payload": {
+            "playerId": "p1"
+          }
+        }
+    """.trimIndent())
+
+        Assertions.assertTrue(called)
+        Assertions.assertTrue(ClientState.myCards.isEmpty())
+        Assertions.assertTrue(ClientState.players.isEmpty())
+        Assertions.assertTrue(ClientState.playerPositions.isEmpty())
+        Assertions.assertTrue(ClientState.playerCharacterMap.isEmpty())
+        Assertions.assertTrue(ClientState.eliminatedPlayers.isEmpty())
+    }
+    @Test
+    fun `SET_READY parses character fallback field`() {
+        LobbyHandler.handle("""
+        {
+          "type": "SET_CHARACTER_TYPE_AND_STATUS_READY",
+          "payload": {
+            "playerId": "p1",
+            "characterType": "DR_RED",
+            "ready": true,
+            "availableCharacters": [],
+            "existingPlayers": [
+              {
+                "playerId": "p1",
+                "ready": true,
+                "character": "DR_BLUE",
+                "position": ""
+              }
+            ]
+          }
+        }
+    """.trimIndent())
+
+        Assertions.assertEquals("DR_BLUE", ClientState.players[0].character)
     }
 }

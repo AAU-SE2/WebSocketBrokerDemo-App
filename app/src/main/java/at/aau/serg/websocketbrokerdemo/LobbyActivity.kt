@@ -7,6 +7,7 @@ import android.util.Log
 import android.widget.*
 import android.view.View
 import androidx.activity.ComponentActivity
+import androidx.activity.addCallback
 import at.aau.serg.websocketbrokerdemo.messaging.dtos.ExistingPlayerDTO
 import at.aau.serg.websocketbrokerdemo.model.CardRepository
 import at.aau.serg.websocketbrokerdemo.model.ClientState
@@ -39,6 +40,11 @@ class LobbyActivity : ComponentActivity() {
             }
         }
         LobbyHandler.onStartGameError = { reason ->
+            runOnUiThread {
+                Toast.makeText(this, reason, Toast.LENGTH_SHORT).show()
+            }
+        }
+        LobbyHandler.onError = { reason ->
             runOnUiThread {
                 Toast.makeText(this, reason, Toast.LENGTH_SHORT).show()
             }
@@ -124,8 +130,10 @@ class LobbyActivity : ComponentActivity() {
             btnLeave.isEnabled = false
             MyStomp.instance.leaveLobby()
             MyStomp.instance.disconnect()
+            val intent = Intent(this, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(intent)
             finish()
-            isLeaving = false
         }
         LobbyHandler.onNewPlayerJoined = { dto ->
             runOnUiThread {
@@ -165,7 +173,13 @@ class LobbyActivity : ComponentActivity() {
         }
 
         LobbyHandler.onPlayerRemoved = {
-            runOnUiThread { finish() }
+            runOnUiThread {
+                MyStomp.instance.disconnect()
+                val intent = Intent(this, MainActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(intent)
+                finish()
+            }
         }
 
         LobbyHandler.onOtherPlayerRemoved = { playerId ->
@@ -185,13 +199,41 @@ class LobbyActivity : ComponentActivity() {
                     .show()
             }
         }
+
+        onBackPressedDispatcher.addCallback(this) {
+            if (isLeaving) return@addCallback
+            isLeaving = true
+            MyStomp.instance.leaveLobby()
+            MyStomp.instance.disconnect()
+            val intent = Intent(this@LobbyActivity, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(intent)
+            finish()
+        }
     }
+
+
+    override fun onDestroy() {
+        LobbyHandler.onLobbyJoined = null
+        LobbyHandler.onNewPlayerJoined = null
+        LobbyHandler.onPlayerRejoined = null
+        LobbyHandler.onPlayerRejoinedRunning = null
+        LobbyHandler.onGameFull = null
+        LobbyHandler.onPlayerRemoved = null
+        LobbyHandler.onOtherPlayerRemoved = null
+        LobbyHandler.onSetReady = null
+        LobbyHandler.onGameStarted = null
+        LobbyHandler.onStartGameError = null
+        LobbyHandler.onError = null
+        super.onDestroy()
+    }
+
     private fun lockCharacterSelection() {
         findViewById<ImageButton>(R.id.btnPrev).visibility = View.GONE
         findViewById<ImageButton>(R.id.btnNext).visibility = View.GONE
         findViewById<Button>(R.id.btnReady).isEnabled = false
         findViewById<ImageView>(R.id.imgReadyCheck).visibility = View.VISIBLE
-        findViewById<Button>(R.id.btnStartGame).alpha = 1f  // NEU
+        findViewById<Button>(R.id.btnStartGame).alpha = 1f
     }
     private fun updateMyCharacterImage(imgView: ImageView) {
 

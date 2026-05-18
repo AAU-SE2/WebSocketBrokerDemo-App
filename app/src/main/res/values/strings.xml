@@ -46,4 +46,5 @@
     <string name="status_in_room">IN ROOM</string>
     <string name="status_suggestion">WAITING FOR RESPONSE</string>
     <string name="status_liar">DECIDING</string>
+    <string name="player_disconnected_countdown">Player %1$s disconnected!\nWaiting for rejoin… %2$d s</string>
 </resources>

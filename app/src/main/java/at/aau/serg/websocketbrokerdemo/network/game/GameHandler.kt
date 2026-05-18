@@ -19,6 +19,7 @@ class GameHandler {
         var onGameAborted: ((String) -> Unit)? = null
         var onGamePaused: ((String, Int) -> Unit)? = null
         var onContinueGame: ((String) -> Unit)? = null
+        var onGameError: ((String) -> Unit)? = null
         fun handle(msg: String) {
             try {
                 val json = JSONObject(msg)
@@ -145,9 +146,53 @@ class GameHandler {
 
                     GameMessageType.GAME_ABORTED.name -> {
                         val reason = payload?.optString("reason", "Game aborted") ?: "Game aborted"
+                        // Reset client state back to lobby
                         ClientState.gameStatus = "LOBBY"
+                        ClientState.currentPhase = ""
+                        ClientState.currentPlayerIndex = 0
+                        ClientState.remainingMoves = 0
+                        ClientState.isEliminated = false
+                        ClientState.eliminatedPlayers.clear()
+                        ClientState.playerPositions.clear()
+                        ClientState.playerCharacterMap.clear()
+                        ClientState.myCards = emptyList()
+                        ClientState.myCharacter = null
+                        ClientState.seenCards.clear()
 
+                        // Restore available characters and players from payload if provided
+                        if (payload != null) {
+                            val availChars = payload.optJSONArray("availableCharacters")
+                            if (availChars != null) {
+                                val chars = mutableListOf<String>()
+                                for (i in 0 until availChars.length()) {
+                                    chars.add(availChars.getString(i))
+                                }
+                                ClientState.availableCharacters = chars
+                            }
+                            val existingPlayers = payload.optJSONArray("existingPlayers")
+                            if (existingPlayers != null) {
+                                val playerList = mutableListOf<ExistingPlayerDTO>()
+                                for (i in 0 until existingPlayers.length()) {
+                                    val p = existingPlayers.getJSONObject(i)
+                                    playerList.add(ExistingPlayerDTO(
+                                        playerId = p.getString("playerId"),
+                                        ready = p.optBoolean("ready", false),
+                                        character = null,
+                                        position = null
+                                    ))
+                                }
+                                ClientState.players = playerList
+                            }
+                        }
                         onGameAborted?.invoke(reason)
+                    }
+
+                    "ROLL_DICE_ERROR", "MOVE_ERROR", "ENTER_ROOM_ERROR",
+                    "HIDDEN_WAY_ERROR", "ACCUSATION_ERROR", "END_TURN_ERROR",
+                    "SUGGESTION_ERROR" -> {
+                        val reason = payload?.optString("reason", "An error occurred") ?: "An error occurred"
+                        Log.w("GameHandler", "Game error ($type): $reason")
+                        onGameError?.invoke(reason)
                     }
 
                     else -> {
