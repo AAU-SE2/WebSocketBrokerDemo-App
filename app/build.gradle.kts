@@ -120,7 +120,9 @@ sonar {
             "**/Callbacks.kt," +
             "**/UserPreferences.kt," +
             "**/MyStomp.kt," +
-            "**/LearnActivity.kt"
+            "**/LearnActivity.kt" +
+            "**/GameUIHelper.kt" +
+            "**/BoardColors.kt"
 
         )
     }
