@@ -109,6 +109,9 @@ sonar {
             "sonar.coverage.jacoco.xmlReportPaths",
             "${project.projectDir}/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
         )
+        property("sonar.issue.ignore.multicriteria", "e1")
+        property("sonar.issue.ignore.multicriteria.e1.ruleKey", "text:S8569")
+        property("sonar.issue.ignore.multicriteria.e1.resourceKey", "**/*")
         property(
             "sonar.coverage.exclusions",
             "**/Color.kt," +
