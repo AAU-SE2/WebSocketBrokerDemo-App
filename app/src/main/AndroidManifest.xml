@@ -19,15 +19,21 @@
             android:name="at.aau.serg.websocketbrokerdemo.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.MyApplication">
+            android:theme="@style/Theme.MyApplication"
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="at.aau.serg.websocketbrokerdemo.LearnActivity" />
-        <activity android:name="at.aau.serg.websocketbrokerdemo.LobbyActivity" />
+        <activity android:name="at.aau.serg.websocketbrokerdemo.LearnActivity"
+            android:screenOrientation="landscape"/>
+        <activity android:name="at.aau.serg.websocketbrokerdemo.LobbyActivity"
+            android:screenOrientation="landscape"/>
+        <activity
+            android:name="at.aau.serg.websocketbrokerdemo.GameActivity"
+            android:screenOrientation="landscape" />
     </application>
 
 </manifest>

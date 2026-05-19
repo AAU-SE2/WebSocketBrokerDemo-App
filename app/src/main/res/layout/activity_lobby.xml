@@ -1,34 +1,204 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+
 
     <ImageView
+        android:id="@+id/imageView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:scaleType="fitXY"
         android:src="@drawable/lobby"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintVertical_bias="0.5" />
 
     <Button
-        android:id="@+id/btnleave"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:alpha="0"
-        android:text="leave"
+        android:id="@+id/btnLeave"
+        android:layout_width="143dp"
+        android:layout_height="31dp"
+        android:alpha="1"
+        android:background="@drawable/transparent_button_bg"
+        android:textColor="#FFFFFF"
+        android:stateListAnimator="@null"
 
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.829"
+        app:layout_constraintHorizontal_bias="0.824"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.26" />
+
+    <Button
+        android:id="@+id/btnReady"
+        android:layout_width="146dp"
+        android:layout_height="35dp"
+        android:alpha="1"
+        android:background="@drawable/transparent_button_bg"
+        android:textColor="#FFFFFF"
+        android:stateListAnimator="@null"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.107"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.262" />
 
+    <Button
+        android:id="@+id/btnStartGame"
+        android:layout_width="141dp"
+        android:layout_height="38dp"
+        android:alpha="1"
+        android:background="@drawable/transparent_button_bg"
+        android:textColor="#FFFFFF"
+        android:stateListAnimator="@null"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.469"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.262" />
+
+    <ImageView
+        android:id="@+id/imgMyCharacter"
+        android:layout_width="115dp"
+        android:layout_height="173dp"
+        android:src="@android:drawable/ic_menu_help"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.82"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.90"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageButton
+        android:id="@+id/btnPrev"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:alpha="1"
+        android:backgroundTint="#66FFFFFF"
+        android:src="@android:drawable/ic_media_previous"
+        app:layout_constraintBottom_toBottomOf="@id/imgMyCharacter"
+        app:layout_constraintEnd_toStartOf="@id/imgMyCharacter"
+        app:layout_constraintTop_toTopOf="@id/imgMyCharacter"
+        app:layout_constraintVertical_bias="0.384" />
+
+    <ImageButton
+        android:id="@+id/btnNext"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:alpha="1"
+        android:backgroundTint="#66FFFFFF"
+        android:src="@android:drawable/ic_media_next"
+        app:layout_constraintBottom_toBottomOf="@id/imgMyCharacter"
+        app:layout_constraintStart_toEndOf="@id/imgMyCharacter"
+        app:layout_constraintTop_toTopOf="@id/imgMyCharacter"
+        app:layout_constraintVertical_bias="0.384" />
+
+    <ImageView
+        android:id="@+id/imgOtherPlayerCharacter2"
+        android:layout_width="115dp"
+        android:layout_height="173dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.82"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.633"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/imgOtherPlayerCharacter3"
+        android:layout_width="115dp"
+        android:layout_height="173dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.82"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.366"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/imgOtherPlayerCharacter4"
+        android:layout_width="115dp"
+        android:layout_height="173dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.82"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.101"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/imgReadyCheck"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="-8dp"
+        android:layout_marginEnd="-20dp"
+        android:src="@drawable/ccheckmark"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/imgMyCharacter"
+        app:layout_constraintEnd_toEndOf="@id/imgMyCharacter" />
+
+    <ImageView
+        android:id="@+id/imgReadyCheck2"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="-8dp"
+        android:layout_marginEnd="-20dp"
+        android:src="@drawable/ccheckmark"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/imgOtherPlayerCharacter2"
+        app:layout_constraintStart_toStartOf="@id/imgOtherPlayerCharacter2"/>
+
+    <ImageView
+        android:id="@+id/imgReadyCheck3"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="-8dp"
+        android:layout_marginEnd="-20dp"
+        android:src="@drawable/ccheckmark"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/imgOtherPlayerCharacter3"
+        app:layout_constraintStart_toStartOf="@id/imgOtherPlayerCharacter3" />
+
+    <ImageView
+        android:id="@+id/imgReadyCheck4"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="-8dp"
+        android:layout_marginEnd="-20dp"
+        android:src="@drawable/ccheckmark"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/imgOtherPlayerCharacter4"
+        app:layout_constraintEnd_toEndOf="@id/imgOtherPlayerCharacter4" />
+
+    <FrameLayout
+        android:id="@+id/loadingOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#88000000"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ProgressBar
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_gravity="center"
+            android:indeterminateTint="#D12E7D" />
+
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+

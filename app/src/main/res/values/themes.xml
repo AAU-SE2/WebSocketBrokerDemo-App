@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.MyApplication" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.MyApplication" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="windowSplashScreenBackground">@android:color/white</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/clogo</item>
+        <item name="postSplashScreenTheme">@style/Theme.MyApplication</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
 
     <style name="ThemeOverlay.MyApplication.FullscreenContainer" parent="">
-        <item name="fullscreenBackgroundColor">@color/light_blue_600</item>
-        <item name="fullscreenTextColor">@color/light_blue_A200</item>
+        <item name="fullscreenBackgroundColor">@color/white</item>
+        <item name="fullscreenTextColor">@color/white</item>
     </style>
+
 </resources>
