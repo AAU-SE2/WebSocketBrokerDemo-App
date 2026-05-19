@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootGameLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/boardContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@android:color/transparent"
+        app:layout_constraintDimensionRatio="1920:1080"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- Board image drawn FIRST so it sits behind all overlays -->
+        <ImageView
+            android:id="@+id/imgBoard"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/cboard"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Room overlay for dots inside rooms -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/roomOverlay"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:clipChildren="false"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Grid overlay for player dots on hallway cells -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/gridOverlay"
+            android:layout_width="257dp"
+            android:layout_height="166dp"
+            android:layout_marginStart="237dp"
+            android:layout_marginTop="132dp"
+            android:layout_marginEnd="237dp"
+            android:layout_marginBottom="113dp"
+            android:background="@android:color/transparent"
+            app:layout_constraintBottom_toBottomOf="@+id/imgBoard"
+            app:layout_constraintEnd_toEndOf="@+id/roomOverlay"
+            app:layout_constraintStart_toStartOf="@+id/roomOverlay"
+            app:layout_constraintTop_toTopOf="@+id/roomOverlay" />
+
+        <LinearLayout
+            android:id="@+id/characterPanel"
+            android:layout_width="80dp"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:padding="4dp" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/checklistOverlay"
+            android:layout_width="165dp"
+            android:layout_height="410dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.22" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideGridTop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.21" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideGridBottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.93" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideGridStart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.25" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideGridEnd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.75" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideBtnTop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.163" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideBtnBottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.207" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideBtn0Start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.200" />
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideBtn0End"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.291" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideBtn1Start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.31" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideBtn1End"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.44" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideBtn2Start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.44" />
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideBtn2End"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.541" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideBtn3Start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.542" />
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideBtn3End"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.666" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideBtn4Start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.667" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideBtn4End"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.75" />
+
+        <Button
+            android:id="@+id/btnRollDice"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@android:color/transparent"
+            android:text=""
+            app:layout_constraintTop_toBottomOf="@id/guideBtnTop"
+            app:layout_constraintBottom_toTopOf="@id/guideBtnBottom"
+            app:layout_constraintStart_toEndOf="@id/guideBtn0Start"
+            app:layout_constraintEnd_toStartOf="@id/guideBtn0End" />
+
+        <Button
+            android:id="@+id/btnHiddenWay"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@android:color/transparent"
+            android:text=""
+            app:layout_constraintTop_toBottomOf="@id/guideBtnTop"
+            app:layout_constraintBottom_toTopOf="@id/guideBtnBottom"
+            app:layout_constraintStart_toEndOf="@id/guideBtn1Start"
+            app:layout_constraintEnd_toStartOf="@id/guideBtn1End" />
+
+        <Button
+            android:id="@+id/btnSuggest"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@android:color/transparent"
+            android:text=""
+            app:layout_constraintTop_toBottomOf="@id/guideBtnTop"
+            app:layout_constraintBottom_toTopOf="@id/guideBtnBottom"
+            app:layout_constraintStart_toEndOf="@id/guideBtn2Start"
+            app:layout_constraintEnd_toStartOf="@id/guideBtn2End" />
+
+        <Button
+            android:id="@+id/btnAccuse"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@android:color/transparent"
+            android:text=""
+            app:layout_constraintTop_toBottomOf="@id/guideBtnTop"
+            app:layout_constraintBottom_toTopOf="@id/guideBtnBottom"
+            app:layout_constraintStart_toEndOf="@id/guideBtn3Start"
+            app:layout_constraintEnd_toStartOf="@id/guideBtn3End" />
+
+        <Button
+            android:id="@+id/btnLeave"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@android:color/transparent"
+            android:text=""
+            app:layout_constraintTop_toBottomOf="@id/guideBtnTop"
+            app:layout_constraintBottom_toTopOf="@id/guideBtnBottom"
+            app:layout_constraintStart_toEndOf="@id/guideBtn4Start"
+            app:layout_constraintEnd_toStartOf="@id/guideBtn4End" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/dialogOverlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -101,18 +101,40 @@ tasks.register<JacocoReport>("jacocoTestReport") {
 
 sonar {
     properties {
-        property("sonar.projectKey", "AAU-SE2_WebSocketBrokerDemo-App")
-        property("sonar.organization", "aau-se2")
+        property("sonar.projectKey", "SE2-Cluedo-2026_App")
+        property("sonar.organization", "se2-cluedo-2026")
         property("sonar.host.url", "https://sonarcloud.io")
         property("sonar.java.coveragePlugin", "jacoco")
         property(
             "sonar.coverage.jacoco.xmlReportPaths",
             "${project.projectDir}/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
         )
+        property("sonar.issue.ignore.multicriteria", "e1")
+        property("sonar.issue.ignore.multicriteria.e1.ruleKey", "text:S8569")
+        property("sonar.issue.ignore.multicriteria.e1.resourceKey", "**/*")
+        property(
+            "sonar.coverage.exclusions",
+            "**/Color.kt," +
+            "**/Theme.kt," +
+            "**/Type.kt," +
+            "**/MainActivity.kt," +
+            "**/LobbyActivity.kt," +
+            "**/GameActivity.kt," +
+            "**/Callbacks.kt," +
+            "**/UserPreferences.kt," +
+            "**/MyStomp.kt," +
+            "**/LearnActivity.kt," +
+            "**/GameUIHelper.kt," +
+            "**/BoardColors.kt," +
+            "**/res/drawable/**,**/res/mipmap-*/**,**/res/font/**"
+
+        )
     }
 }
 
 dependencies {
+    implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation("com.google.android.material:material:1.12.0")
     implementation(libs.krossbow.websocket.okhttp)
     implementation(libs.krossbow.stomp.core)
     implementation(libs.krossbow.websocket.builtin)
@@ -125,6 +147,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.junit.ktx)
     testImplementation(libs.junit)
     testImplementation(libs.junit.jupiter.api)
     testRuntimeOnly(libs.junit.jupiter.engine)
@@ -135,4 +158,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    testImplementation("org.json:json:20231013")
+    testImplementation("org.mockito:mockito-core:5.11.0")
+    testImplementation("org.mockito:mockito-inline:5.2.0")
 }

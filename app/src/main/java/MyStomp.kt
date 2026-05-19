@@ -2,6 +2,10 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import at.aau.serg.websocketbrokerdemo.Callbacks
+import at.aau.serg.websocketbrokerdemo.messaging.dtos.OutgoingLobbyMessageType
+import at.aau.serg.websocketbrokerdemo.model.ClientState
+import at.aau.serg.websocketbrokerdemo.network.game.GameHandler
+import at.aau.serg.websocketbrokerdemo.network.lobby.LobbyHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -14,50 +18,87 @@ import org.hildan.krossbow.stomp.subscribeText
 import org.hildan.krossbow.websocket.okhttp.OkHttpWebSocketClient
 import org.json.JSONObject
 
-private const val WEBSOCKET_URI = "ws://10.0.2.2:8080/websocket-example-broker"
-
+private const val WEBSOCKET_URI = "ws://se2-demo.aau.at:53211/websocket-example-broker"
+private const val LOBBY_DESTINATION = "/app/lobby"
+private const val GAME_DESTINATION = "/app/game"
 class MyStomp(val callbacks: Callbacks) {
-    private var topicFlow: Flow<String>? = null
-    private var collector: Job? = null
-    private var jsonFlow: Flow<String>? = null
-    private var jsonCollector: Job? = null
+    private var lobbyFlow: Flow<String>? = null
+    private var lobbyCollector: Job? = null
+    private var gameFlow: Flow<String>? = null
+    private var gameCollector: Job? = null
 
     private lateinit var client: StompClient
-    private var session: StompSession? = null
 
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
+    private lateinit var activeSession: StompSession
+
+    private var connected = false
+    companion object {
+        lateinit var instance: MyStomp
+    }
+
+    init {
+        instance = this
+    }
+
     fun connect() {
-        client = StompClient(OkHttpWebSocketClient()) // other config can be passed in here
+        Log.d("STOMP", "CONNECT called")
+        // Cancel any previous collectors before starting a fresh connection
+        lobbyCollector?.cancel()
+        lobbyCollector = null
+        gameCollector?.cancel()
+        gameCollector = null
+        lobbyFlow = null
+        gameFlow = null
+
+        client = StompClient(OkHttpWebSocketClient())
         scope.launch {
             try {
-                val activeSession = client.connect(WEBSOCKET_URI)
-                session = activeSession
+                activeSession = client.connect(WEBSOCKET_URI)
 
-                // connect to topic
-                topicFlow = activeSession.subscribeText("/topic/hello-response")
-                collector = scope.launch {
-                    topicFlow?.collect { msg ->
-                        // TODO logic
-                        callback(msg)
+                Log.d("STOMP", "CONNECTED -> session = $activeSession")
+                // connect to topic lobby-response
+                lobbyFlow = activeSession.subscribeText("/topic/lobby-response")
+                lobbyCollector = scope.launch {
+                    try {
+                        lobbyFlow?.collect { msg ->
+                            Log.d("MyStomp", "Received lobby-response: $msg")
+                            LobbyHandler.handle(msg)
+                        }
+                    } catch (e: Exception) {
+                        Log.e("MyStomp", "Lobby connection lost", e)
                     }
                 }
 
-                // connect to JSON topic
-                jsonFlow = activeSession.subscribeText("/topic/rcv-object")
-                jsonCollector = scope.launch {
-                    jsonFlow?.collect { msg ->
-                        val o = JSONObject(msg)
-                        callback(o.get("text").toString())
+                gameFlow = activeSession.subscribeText("/topic/game-response")
+                gameCollector = scope.launch {
+                    try {
+                        gameFlow?.collect { msg ->
+                            Log.d("MyStomp", "Received game-response: $msg")
+                            GameHandler.handle(msg)
+                        }
+                    } catch (e: Exception) {
+                        Log.e("MyStomp", "Game connection lost", e)
                     }
                 }
                 callback("connected")
+                val payload = JSONObject()
+                payload.put("playerKey", ClientState.playerId)
+
+                val json = JSONObject()
+                json.put("type", OutgoingLobbyMessageType.JOIN_LOBBY.toString())
+                json.put("payload", payload)
+                Log.d("STOMP", "AUTO JOIN -> session = $activeSession")
+                activeSession.sendText(LOBBY_DESTINATION, json.toString())
 
             } catch (e: Exception) {
                 Log.e("MyStomp", "Connection failed", e)
                 callback("Connection error")
             }
         }
+
+
     }
 
     private fun callback(msg: String) {
@@ -66,34 +107,180 @@ class MyStomp(val callbacks: Callbacks) {
         }
     }
 
-    fun sendHello() {
+    fun disconnect() {
+        // Cancel collectors, but do NOT cancel the scope itself — we need it for reconnection.
+        lobbyCollector?.cancel()
+        lobbyCollector = null
+        gameCollector?.cancel()
+        gameCollector = null
+        lobbyFlow = null
+        gameFlow = null
+        // Close the STOMP session asynchronously
         scope.launch {
             try {
-                session?.let {
-                    Log.e("tag", "connecting to topic")
-                    it.sendText("/app/hello", "message from client")
-                } ?: run {
-                    Log.e("MyStomp", "Cannot send: Session is null")
+                if (::activeSession.isInitialized) {
+                    try {
+                        activeSession.disconnect()
+                    } catch (_: Exception) { }
+                }
+                connected = false
+                Log.d("MyStomp", "Disconnected successfully")
+            } catch (e: Exception) {
+                Log.e("MyStomp", "Disconnect failed", e)
+            }
+        }
+    }
+
+
+    fun leaveLobby() {
+        val payload = JSONObject()
+        payload.put("playerId", ClientState.playerId)
+
+        val json = JSONObject()
+        json.put("type", OutgoingLobbyMessageType.LEAVE_LOBBY.toString())
+        json.put("payload", payload)
+        Log.d("STOMP", "LEAVE -> session = $activeSession")
+
+        scope.launch {
+            try {
+                if (::activeSession.isInitialized) {
+                    activeSession.sendText(LOBBY_DESTINATION, json.toString())
+                } else {
                     callback("Error: Not connected")
                 }
             } catch (e: Exception) {
-                Log.e("MyStomp", "Send failed", e)
+                Log.e("MyStomp", "Leaving lobby failed", e)
             }
         }
     }
-
-    fun sendJson() {
+    fun startGame() {
+        val payload = JSONObject()
         val json = JSONObject()
-        json.put("from", "client")
-        json.put("text", "from client")
-        val o = json.toString()
+        json.put("type", OutgoingLobbyMessageType.START_GAME.toString())
+        json.put("payload", payload)
+        Log.d("MyStomp", "Sending START_GAME: $json")
 
         scope.launch {
             try {
-                session?.sendText("/app/object", o) ?: callback("Error: Not connected")
+                activeSession.sendText(LOBBY_DESTINATION, json.toString())
+                    ?: callback("Error: Not connected")
             } catch (e: Exception) {
-                Log.e("MyStomp", "Send JSON failed", e)
+                Log.e("MyStomp", "START_GAME failed", e)
             }
         }
     }
+    fun endTurn() {
+        val payload = JSONObject()
+
+        val json = JSONObject()
+        json.put("type", "END_TURN")
+        json.put("payload", payload)
+
+        Log.d("MyStomp", "Sending END_TURN: $json")
+
+        scope.launch {
+            try {
+                if (::activeSession.isInitialized) {
+                    activeSession.sendText("/app/game", json.toString())
+                } else {
+                    callback("Error: Not connected")
+                }
+            } catch (e: Exception) {
+                Log.e("MyStomp", "END_TURN failed", e)
+            }
+        }
+    }
+    fun setReady(characterType: String, isReady: Boolean) {
+        val json = JSONObject()
+        json.put("type", "SET_CHARACTER_TYPE_AND_STATUS_READY")
+
+        val payload = JSONObject()
+        payload.put("playerId", ClientState.playerId)
+        payload.put("characterType", characterType)
+        payload.put("ready", isReady)
+
+        json.put("payload", payload)
+        Log.d("STOMP", "SET_READY -> session = $activeSession")
+
+        scope.launch {
+            try {
+                if (::activeSession.isInitialized) {
+                    activeSession.sendText(LOBBY_DESTINATION, json.toString())
+                } else {
+                    callback("Error: Not connected")
+                }
+            } catch (e: Exception) {
+                Log.e("MyStomp", "SET_READY failed", e)
+            }
+        }
+    }
+
+    fun rollDice() {
+        sendGameMessage("ROLL_DICE") { payload ->
+            payload.put("playerId", ClientState.playerId)
+        }
+    }
+
+    fun move(position: String) {
+        sendGameMessage("MOVE") { payload ->
+            payload.put("playerId", ClientState.playerId)
+            payload.put("position", position)
+        }
+    }
+
+    fun enterRoom(roomId: String) {
+        sendGameMessage("ENTER_ROOM") { payload ->
+            payload.put("playerId", ClientState.playerId)
+            payload.put("roomId", roomId)
+        }
+    }
+
+    fun takeHiddenWay() {
+        sendGameMessage("TAKE_HIDDEN_WAY") { payload ->
+            payload.put("playerId", ClientState.playerId)
+        }
+    }
+
+
+    private fun sendGameMessage(type: String, buildPayload: (JSONObject) -> Unit) {
+        val payload = JSONObject()
+        buildPayload(payload)
+
+        val json = JSONObject()
+        json.put("type", type)
+        json.put("payload", payload)
+
+        Log.d("MyStomp", "Sending $type: $json")
+
+        scope.launch {
+            try {
+                if (::activeSession.isInitialized) {
+                    activeSession.sendText(GAME_DESTINATION, json.toString())
+                } else {
+                    callback("Error: Not connected")
+                }
+            } catch (e: Exception) {
+                Log.e("MyStomp", "$type failed", e)
+            }
+        }
+    }
+
+    fun makeSuggestion(suspect: String, room: String, weapon: String) {
+        sendGameMessage("MAKE_SUGGESTION") { payload ->
+            payload.put("suggesterID", ClientState.playerId)
+            payload.put("suspect", suspect)
+            payload.put("room", room)
+            payload.put("weapon", weapon)
+        }
+    }
+
+    fun makeAccusation(suspect: String, room: String, weapon: String) {
+        sendGameMessage("MAKE_ACCUSATION") { payload ->
+            payload.put("accuserID", ClientState.playerId)
+            payload.put("suspect", suspect)
+            payload.put("room", room)
+            payload.put("weapon", weapon)
+        }
+    }
+
 }
