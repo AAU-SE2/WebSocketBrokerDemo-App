@@ -247,7 +247,7 @@ class GameActivity : ComponentActivity() {
 
         dialogOverlay.visibility = View.VISIBLE
         GameUIHelper.showCardSelectionOverlay(
-            this, dialogOverlay, "SUGGESTION",
+            this, dialogOverlay, "MAKE A SUGGESTION",
             includeRooms = false,
             currentRoom = pos
         ) { suspect, room, weapon ->
@@ -264,7 +264,7 @@ class GameActivity : ComponentActivity() {
 
         dialogOverlay.visibility = View.VISIBLE
         GameUIHelper.showCardSelectionOverlay(
-            this, dialogOverlay, "ACCUSATION",
+            this, dialogOverlay, "MAKE AN ACCUSATION",
             includeRooms = true,
             currentRoom = null
         ) { suspect, room, weapon ->

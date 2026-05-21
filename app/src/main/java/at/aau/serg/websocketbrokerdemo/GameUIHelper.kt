@@ -1,6 +1,7 @@
 package at.aau.serg.websocketbrokerdemo
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.util.TypedValue
@@ -19,6 +20,8 @@ import at.aau.serg.websocketbrokerdemo.model.CardRepository
 import at.aau.serg.websocketbrokerdemo.model.ClientState
 import com.example.myapplication.R
 import androidx.core.graphics.toColorInt
+import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 
 object GameUIHelper {
 
@@ -144,8 +147,9 @@ object GameUIHelper {
 
         val titleView = TextView(context)
         titleView.text = title
-        titleView.setTextColor(Color.WHITE)
-        titleView.textSize = 18f
+        titleView.setTextColor(ContextCompat.getColor(context, R.color.cluedo_pink))
+        titleView.textSize = 22f
+        titleView.typeface = ResourcesCompat.getFont(context, R.font.freckle_face)
         titleView.gravity = Gravity.CENTER
         titleView.setPadding(0, dpToPx(context, 4), 0, dpToPx(context, 8))
         content.addView(titleView)
@@ -161,7 +165,13 @@ object GameUIHelper {
         ): LinearLayout {
             val sectionLabel = TextView(context)
             sectionLabel.text = label
-            sectionLabel.setTextColor("#E91E63".toColorInt())
+            sectionLabel.setTextColor(ContextCompat.getColor(context, R.color.cluedo_pink))
+            sectionLabel.typeface = ResourcesCompat.getFont(context, R.font.freckle_face)
+            sectionLabel.gravity = Gravity.CENTER
+            sectionLabel.layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
             sectionLabel.textSize = 14f
             sectionLabel.setPadding(0, dpToPx(context, 4), 0, dpToPx(context, 2))
             content.addView(sectionLabel)
@@ -218,6 +228,10 @@ object GameUIHelper {
 
         val btnConfirm = Button(context)
         btnConfirm.text = context.getString(R.string.confirm)
+        btnConfirm.setTextColor(Color.WHITE)
+        btnConfirm.typeface = ResourcesCompat.getFont(context, R.font.freckle_face)
+        btnConfirm.isAllCaps = false
+        btnConfirm.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.cluedo_pink))
         btnConfirm.setOnClickListener {
             val s = selectedSuspect
             val w = selectedWeapon
@@ -231,6 +245,10 @@ object GameUIHelper {
 
         val btnCancel = Button(context)
         btnCancel.text = context.getString(R.string.cancel)
+        btnCancel.setTextColor(Color.WHITE)
+        btnCancel.typeface = ResourcesCompat.getFont(context, R.font.freckle_face)
+        btnCancel.isAllCaps = false
+        btnCancel.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.cluedo_pink))
         btnCancel.setOnClickListener { parent.removeView(overlay) }
         btnRow.addView(btnCancel)
 
