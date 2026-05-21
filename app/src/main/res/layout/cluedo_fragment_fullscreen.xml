@@ -72,13 +72,13 @@
             <ProgressBar
                 android:layout_width="64dp"
                 android:layout_height="64dp"
-                android:indeterminateTint="#D12E7D" />
+                android:indeterminateTint="#F50057" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="CONNECTING TO SERVER..."
-                android:textColor="#D12E7D"
+                android:textColor="#F50057"
                 android:textSize="18sp"
                 android:fontFamily="@font/freckle_face"
                 android:layout_marginTop="12dp" />
