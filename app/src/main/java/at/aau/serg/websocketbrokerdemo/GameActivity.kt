@@ -142,7 +142,7 @@ class GameActivity : ComponentActivity() {
         characterPanel.removeAllViews()
         characterHighlights.clear()
         playerStatusViews.clear()
-        characterPanel.setBackgroundColor(Color.argb(120, 0, 0, 0))
+        characterPanel.setBackgroundColor(Color.argb(0, 0, 0, 0))
         characterPanel.visibility = View.VISIBLE
 
         for (player in ClientState.players) {
@@ -162,7 +162,7 @@ class GameActivity : ComponentActivity() {
 
             val highlightView = itemView.findViewById<View>(R.id.viewActiveHighlight)
             val border = GradientDrawable()
-            border.setStroke(GameUIHelper.dpToPx(this, 3), Color.parseColor("#D12E7D"))
+            border.setStroke(GameUIHelper.dpToPx(this, 3), Color.parseColor("#F50057"))
             border.cornerRadius = GameUIHelper.dpToPx(this, 4).toFloat()
             border.setColor(Color.TRANSPARENT)
             highlightView.background = border
