@@ -313,20 +313,25 @@ class GameActivity : ComponentActivity() {
 
                         if (room != null) {
                             // Problem 3 Fix: Show dialog to enter room on door field
-                            android.app.AlertDialog.Builder(this)
-                                .setTitle("Enter Room?")
-                                .setMessage("Do you want to enter the $room?")
-                                .setPositiveButton("Yes") { _, _ ->
-                                    MyStomp.instance.enterRoom(room)
-                                }
-                                .setNegativeButton("No") { _, _ ->
-                                    // Player chose not to enter — end turn if no moves left
-                                    if (movesLeft == 0) {
-                                        MyStomp.instance.endTurn()
-                                    }
-                                }
+                            val dialogView = layoutInflater.inflate(R.layout.dialog_enter_room, null)
+                            dialogView.findViewById<TextView>(R.id.tvTitle).text = "ENTER $room?"
+                            dialogView.findViewById<TextView>(R.id.tvMessage).text = "DO YOU WANT TO ENTER THE $room?"
+
+                            val customDialog = android.app.AlertDialog.Builder(this)
+                                .setView(dialogView)
                                 .setCancelable(false)
-                                .show()
+                                .create()
+
+                            dialogView.findViewById<Button>(R.id.btnYes).setOnClickListener {
+                                MyStomp.instance.enterRoom(room)
+                                customDialog.dismiss()
+                            }
+                            dialogView.findViewById<Button>(R.id.btnNo).setOnClickListener {
+                                if (movesLeft == 0) MyStomp.instance.endTurn()
+                                customDialog.dismiss()
+                            }
+
+                            customDialog.show()
                         }
                     }
                 }
