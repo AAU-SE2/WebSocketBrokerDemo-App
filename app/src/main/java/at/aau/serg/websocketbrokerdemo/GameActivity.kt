@@ -142,7 +142,7 @@ class GameActivity : ComponentActivity() {
         characterPanel.removeAllViews()
         characterHighlights.clear()
         playerStatusViews.clear()
-        characterPanel.setBackgroundColor(Color.argb(120, 0, 0, 0))
+        characterPanel.setBackgroundColor(Color.argb(0, 0, 0, 0))
         characterPanel.visibility = View.VISIBLE
 
         for (player in ClientState.players) {
@@ -162,7 +162,7 @@ class GameActivity : ComponentActivity() {
 
             val highlightView = itemView.findViewById<View>(R.id.viewActiveHighlight)
             val border = GradientDrawable()
-            border.setStroke(GameUIHelper.dpToPx(this, 3), Color.parseColor("#D12E7D"))
+            border.setStroke(GameUIHelper.dpToPx(this, 3), Color.parseColor("#F50057"))
             border.cornerRadius = GameUIHelper.dpToPx(this, 4).toFloat()
             border.setColor(Color.TRANSPARENT)
             highlightView.background = border
@@ -247,7 +247,7 @@ class GameActivity : ComponentActivity() {
 
         dialogOverlay.visibility = View.VISIBLE
         GameUIHelper.showCardSelectionOverlay(
-            this, dialogOverlay, "SUGGESTION",
+            this, dialogOverlay, "MAKE A SUGGESTION",
             includeRooms = false,
             currentRoom = pos
         ) { suspect, room, weapon ->
@@ -264,9 +264,9 @@ class GameActivity : ComponentActivity() {
 
         dialogOverlay.visibility = View.VISIBLE
         GameUIHelper.showCardSelectionOverlay(
-            this, dialogOverlay, "ACCUSATION",
-            includeRooms = true,
-            currentRoom = null
+            this, dialogOverlay, "MAKE AN ACCUSATION",
+            includeRooms = false,
+            currentRoom = pos
         ) { suspect, room, weapon ->
             dialogOverlay.visibility = View.GONE
             MyStomp.instance.makeAccusation(suspect, room, weapon)
@@ -313,20 +313,25 @@ class GameActivity : ComponentActivity() {
 
                         if (room != null) {
                             // Problem 3 Fix: Show dialog to enter room on door field
-                            android.app.AlertDialog.Builder(this)
-                                .setTitle("Enter Room?")
-                                .setMessage("Do you want to enter the $room?")
-                                .setPositiveButton("Yes") { _, _ ->
-                                    MyStomp.instance.enterRoom(room)
-                                }
-                                .setNegativeButton("No") { _, _ ->
-                                    // Player chose not to enter — end turn if no moves left
-                                    if (movesLeft == 0) {
-                                        MyStomp.instance.endTurn()
-                                    }
-                                }
+                            val dialogView = layoutInflater.inflate(R.layout.dialog_enter_room, null)
+                            dialogView.findViewById<TextView>(R.id.tvTitle).text = "ENTER $room?"
+                            dialogView.findViewById<TextView>(R.id.tvMessage).text = "DO YOU WANT TO ENTER THE $room?"
+
+                            val customDialog = android.app.AlertDialog.Builder(this)
+                                .setView(dialogView)
                                 .setCancelable(false)
-                                .show()
+                                .create()
+
+                            dialogView.findViewById<Button>(R.id.btnYes).setOnClickListener {
+                                MyStomp.instance.enterRoom(room)
+                                customDialog.dismiss()
+                            }
+                            dialogView.findViewById<Button>(R.id.btnNo).setOnClickListener {
+                                if (movesLeft == 0) MyStomp.instance.endTurn()
+                                customDialog.dismiss()
+                            }
+
+                            customDialog.show()
                         }
                     }
                 }

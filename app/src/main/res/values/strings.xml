@@ -7,11 +7,11 @@
     <string name="title_activity_main2">MainActivity2</string>
 
     <string name="checkmark">✓</string>
-    <string name="suspect">SUSPECT</string>
-    <string name="weapon">WEAPON</string>
-    <string name="room">ROOM</string>
-    <string name="confirm">Confirm</string>
-    <string name="cancel">Cancel</string>
+    <string name="suspect">WHO WAS IT?</string>
+    <string name="weapon">WITH WHAT?</string>
+    <string name="room">WHERE?</string>
+        <string name="confirm">CONFIRM</string>
+    <string name="cancel">CANCEL</string>
     <string name="checking_cards">Checking cards… %1$d</string>
 
     <string name="btn_roll_dice">Roll Dice</string>

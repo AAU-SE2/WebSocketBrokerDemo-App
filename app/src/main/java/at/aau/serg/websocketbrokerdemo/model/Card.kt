@@ -1,5 +1,4 @@
 package at.aau.serg.websocketbrokerdemo.model
-import at.aau.serg.websocketbrokerdemo.model.Card
 import com.example.myapplication.R
 
 data class Card (
@@ -20,7 +19,7 @@ object CardRepository {
         Card("LOUNGE", R.drawable.clounge),
         Card("STUDY", R.drawable.cstudy),
         Card("BALLROOM", R.drawable.cballroom),
-        Card("LIBRARY", R.drawable.clieberary),
+        Card("LIBRARY", R.drawable.clibrary),
         Card("BILLIARDROOM", R.drawable.cbilliardroom),
 
         Card("MEAT_CLEAVER", R.drawable.cmeatcleaver),
