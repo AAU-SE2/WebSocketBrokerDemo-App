@@ -265,8 +265,8 @@ class GameActivity : ComponentActivity() {
         dialogOverlay.visibility = View.VISIBLE
         GameUIHelper.showCardSelectionOverlay(
             this, dialogOverlay, "MAKE AN ACCUSATION",
-            includeRooms = true,
-            currentRoom = null
+            includeRooms = false,
+            currentRoom = pos
         ) { suspect, room, weapon ->
             dialogOverlay.visibility = View.GONE
             MyStomp.instance.makeAccusation(suspect, room, weapon)
