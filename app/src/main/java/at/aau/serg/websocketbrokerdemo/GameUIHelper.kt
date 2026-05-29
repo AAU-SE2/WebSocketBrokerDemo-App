@@ -24,6 +24,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 
 object GameUIHelper {
+    private val colorNum = "#E91E63"
 
     fun dpToPx(context: Context, dp: Int): Int {
         return TypedValue.applyDimension(
@@ -85,14 +86,14 @@ object GameUIHelper {
                     dot.layoutParams = lp
                     val shape = GradientDrawable()
                     shape.shape = GradientDrawable.OVAL
-                    shape.setColor("#E91E63".toColorInt())
+                    shape.setColor(colorNum.toColorInt())
                     dot.background = shape
                     container.addView(dot)
                 }
                 if (ClientState.seenCards.contains(item) && !ClientState.myCards.contains(item)) {
                     val check = TextView(context)
                     check.text = context.getString(R.string.checkmark)
-                    check.setTextColor("#E91E63".toColorInt())
+                    check.setTextColor(colorNum.toColorInt())
                     check.textSize = 10f
                     val lp = ConstraintLayout.LayoutParams(
                         ConstraintLayout.LayoutParams.WRAP_CONTENT,

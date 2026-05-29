@@ -18,7 +18,7 @@ import org.hildan.krossbow.stomp.subscribeText
 import org.hildan.krossbow.websocket.okhttp.OkHttpWebSocketClient
 import org.json.JSONObject
 
-private const val WEBSOCKET_URI = "ws://se2-demo.aau.at:53211/websocket-example-broker"
+private const val WEBSOCKET_URI = "ws://se2-demo.aau.at:5300/websocket-example-broker"
 private const val LOBBY_DESTINATION = "/app/lobby"
 private const val GAME_DESTINATION = "/app/game"
 class MyStomp(val callbacks: Callbacks) {
@@ -34,6 +34,8 @@ class MyStomp(val callbacks: Callbacks) {
     private lateinit var activeSession: StompSession
 
     private var connected = false
+
+    private val connectErr= "Error: Not connected!"
     companion object {
         lateinit var instance: MyStomp
     }
@@ -94,7 +96,7 @@ class MyStomp(val callbacks: Callbacks) {
 
             } catch (e: Exception) {
                 Log.e("MyStomp", "Connection failed", e)
-                callback("Connection error")
+                callback(connectErr)
             }
         }
 
@@ -146,7 +148,7 @@ class MyStomp(val callbacks: Callbacks) {
                 if (::activeSession.isInitialized) {
                     activeSession.sendText(LOBBY_DESTINATION, json.toString())
                 } else {
-                    callback("Error: Not connected")
+                    callback(connectErr)
                 }
             } catch (e: Exception) {
                 Log.e("MyStomp", "Leaving lobby failed", e)
@@ -163,7 +165,7 @@ class MyStomp(val callbacks: Callbacks) {
         scope.launch {
             try {
                 activeSession.sendText(LOBBY_DESTINATION, json.toString())
-                    ?: callback("Error: Not connected")
+                    ?: callback(connectErr)
             } catch (e: Exception) {
                 Log.e("MyStomp", "START_GAME failed", e)
             }
@@ -183,7 +185,7 @@ class MyStomp(val callbacks: Callbacks) {
                 if (::activeSession.isInitialized) {
                     activeSession.sendText("/app/game", json.toString())
                 } else {
-                    callback("Error: Not connected")
+                    callback(connectErr)
                 }
             } catch (e: Exception) {
                 Log.e("MyStomp", "END_TURN failed", e)
@@ -207,7 +209,7 @@ class MyStomp(val callbacks: Callbacks) {
                 if (::activeSession.isInitialized) {
                     activeSession.sendText(LOBBY_DESTINATION, json.toString())
                 } else {
-                    callback("Error: Not connected")
+                    callback(connectErr)
                 }
             } catch (e: Exception) {
                 Log.e("MyStomp", "SET_READY failed", e)
@@ -257,7 +259,7 @@ class MyStomp(val callbacks: Callbacks) {
                 if (::activeSession.isInitialized) {
                     activeSession.sendText(GAME_DESTINATION, json.toString())
                 } else {
-                    callback("Error: Not connected")
+                    callback(connectErr)
                 }
             } catch (e: Exception) {
                 Log.e("MyStomp", "$type failed", e)
