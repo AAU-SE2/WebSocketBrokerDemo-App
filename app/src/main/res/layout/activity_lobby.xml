@@ -72,12 +72,13 @@
         android:id="@+id/imgMyCharacter"
         android:layout_width="115dp"
         android:layout_height="173dp"
+        android:layout_gravity="center_vertical"
         android:src="@android:drawable/ic_menu_help"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.82"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.90"
+        app:layout_constraintHorizontal_bias="0.8975"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageButton
@@ -108,33 +109,36 @@
         android:id="@+id/imgOtherPlayerCharacter2"
         android:layout_width="115dp"
         android:layout_height="173dp"
+        android:layout_gravity="center_vertical"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.82"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.633"
+        app:layout_constraintHorizontal_bias="0.635"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
         android:id="@+id/imgOtherPlayerCharacter3"
         android:layout_width="115dp"
         android:layout_height="173dp"
+        android:layout_gravity="center_vertical"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.82"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.366"
+        app:layout_constraintHorizontal_bias="0.375"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
         android:id="@+id/imgOtherPlayerCharacter4"
         android:layout_width="115dp"
         android:layout_height="173dp"
+        android:layout_gravity="center_vertical"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.82"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.101"
+        app:layout_constraintHorizontal_bias="0.115"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
@@ -157,7 +161,7 @@
         android:src="@drawable/ccheckmark"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="@id/imgOtherPlayerCharacter2"
-        app:layout_constraintStart_toStartOf="@id/imgOtherPlayerCharacter2"/>
+        app:layout_constraintEnd_toEndOf="@id/imgOtherPlayerCharacter2"/>
 
     <ImageView
         android:id="@+id/imgReadyCheck3"
@@ -168,7 +172,7 @@
         android:src="@drawable/ccheckmark"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="@id/imgOtherPlayerCharacter3"
-        app:layout_constraintStart_toStartOf="@id/imgOtherPlayerCharacter3" />
+        app:layout_constraintEnd_toEndOf="@id/imgOtherPlayerCharacter3" />
 
     <ImageView
         android:id="@+id/imgReadyCheck4"
@@ -201,4 +205,3 @@
     </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-
